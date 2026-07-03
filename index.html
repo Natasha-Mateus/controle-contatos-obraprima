@@ -243,7 +243,7 @@
         <th class="left" style="width:240px">Razão Social</th>
         <th class="left" style="width:200px">Fantasia</th>
         <th style="width:90px">MRR</th>
-        <th style="width:80px">HS</th>
+        <th class="sortable" style="width:80px" id="th-hs" onclick="toggleSortHS()">HS ↕</th>
         <th class="sortable" style="width:110px" id="th-dias" onclick="toggleSortDias()">Últ. Tarefa (Dias) ↕</th>
         <th style="width:110px">Minha Carteira?</th>
         <th class="sortable" style="width:125px" id="th-t1" onclick="toggleSortDataTentativa('t1', 'th-t1', '1ª Tentativa')">1ª Tentativa ↕</th>
@@ -412,6 +412,7 @@ const STORAGE_KEY_CLIENTS = 'obra_prima_clients_mensal_v1';
 let memoryInteractions = {}; 
 
 let currentSortOrderDias = 'asc';
+let currentSortOrderHS = 'asc'; // Controle de estado da ordenação do HS
 let currentSortOrderContato = 'none';
 let dateSortStates = { t1: 'none', t2: 'none', t3: 'none', tl: 'none' };
 
@@ -720,6 +721,7 @@ function onMonthChange() {
 
 function resetaHeadersExcept(idAtivo) {
   const headers = {
+    'th-hs': 'HS ↕',
     'th-dias': 'Últ. Tarefa (Dias) ↕',
     'th-t1': '1ª Tentativa ↕',
     'th-t2': '2ª Tentativa ↕',
@@ -731,6 +733,7 @@ function resetaHeadersExcept(idAtivo) {
     if (id !== idAtivo) document.getElementById(id).innerHTML = headers[id];
   });
   if (idAtivo !== 'th-contato') currentSortOrderContato = 'none';
+  if (idAtivo !== 'th-hs') currentSortOrderHS = 'none';
   Object.keys(dateSortStates).forEach(k => {
     if (`th-${k}` !== idAtivo) dateSortStates[k] = 'none';
   });
@@ -747,6 +750,33 @@ function getInteractionValue(razao, campoData) {
     if (campoData === 'tl') return dataObj.tld || '';
   }
   return '';
+}
+
+// 🔮 NOVA FUNÇÃO MATEMÁTICA PARA ORDENAR A COLUNA "HS" (SUPORTA NEGATIVOS, ZERO E POSITIVOS)
+function toggleSortHS() {
+  const thHS = document.getElementById('th-hs');
+  resetaHeadersExcept('th-hs');
+  const mes = document.getElementById('mesReferencia').value;
+
+  if (currentSortOrderHS === 'asc' || currentSortOrderHS === 'none') {
+    clients.sort((a, b) => {
+      // Carrega o valor real numérico do HS guardado na nuvem para aquele cliente
+      const valA = parseFloat(obterDadosClienteDoCache(generateId(a[0]), a[0], mes)?.hs) || 0;
+      const valB = parseFloat(obterDadosClienteDoCache(generateId(b[0]), b[0], mes)?.hs) || 0;
+      return valA - valB; // Menor para o Maior
+    });
+    currentSortOrderHS = 'desc';
+    thHS.innerHTML = "HS 🔼 Menor para Maior";
+  } else {
+    clients.sort((a, b) => {
+      const valA = parseFloat(obterDadosClienteDoCache(generateId(a[0]), a[0], mes)?.hs) || 0;
+      const valB = parseFloat(obterDadosClienteDoCache(generateId(b[0]), b[0], mes)?.hs) || 0;
+      return valB - valA; // Maior para o Menor
+    });
+    currentSortOrderHS = 'asc';
+    thHS.innerHTML = "HS 🔽 Maior para Menor";
+  }
+  buildTable();
 }
 
 function toggleSortDataTentativa(campo, thId, labelOriginal) {
@@ -884,7 +914,6 @@ function executarMigracaoDoAnexo() {
   }
 }
 
-// 🔮 PROCESSO DE IMPORTAÇÃO ATUALIZADO (SUPORTANDO A VARREDURA POR PALAVRA-CHAVE EM TAGS)
 function importFromPaste() {
   const input = document.getElementById('csvInput').value.trim();
   if (!input) { return alert("Cole os dados primeiro."); }
@@ -896,19 +925,17 @@ function importFromPaste() {
 
   lines.forEach(line => {
     const tokens = line.includes('\t') ? line.split('\t') : line.split(';');
-    // Exige a estrutura de 5 colunas definida: Razão, Fantasia, MRR, Tags, Dias
     if (tokens.length >= 5) {
       const razao = tokens[0].trim();
       const fantasia = tokens[1].trim();
       const mrr = tokens[2].trim();
-      const tagsCélula = tokens[3].trim().toLowerCase(); // Pega a célula cheia de informações e passa para minúsculo
+      const tagsCélula = tokens[3].trim().toLowerCase(); 
       const dias = parseInt(tokens[4].trim().replace(/[^0-9]/g, '')) || 0;
 
       if (razao) {
         newClients.push([razao, fantasia, mrr, dias]);
 
-        // Executa a lógica inteligente de varredura na célula de tags
-        let carteiraIdentificada = 'starter'; // Default de segurança
+        let carteiraIdentificada = 'starter'; 
         if (tagsCélula.includes('basic')) {
           carteiraIdentificada = 'basic';
         } else if (tagsCélula.includes('starter')) {
@@ -918,12 +945,10 @@ function importFromPaste() {
         const clientId = generateId(razao);
         const storageKeyUnique = `${clientId}_${mesSelecionado}`;
 
-        // Obtém o registro existente deste mês ou monta a base estrutural dele
         const estadoExistente = memoryInteractions[storageKeyUnique] || {
           hs: '', t1: false, t1d: '', t2: false, t2d: '', t3: false, t3d: '', tl: false, tld: '', canal: '', contato: 'nao'
         };
 
-        // Aplica a nova carteira escaneada por palavra-chave
         estadoExistente.starter = carteiraIdentificada;
         estadoExistente.foiPreenchido = true;
 
@@ -937,7 +962,6 @@ function importFromPaste() {
     clients = newClients;
     localStorage.setItem(STORAGE_KEY_CLIENTS, JSON.stringify(clients));
     
-    // Atualiza no banco as carteiras escaneadas antes de redesenhar a tabela
     db.ref().update(updates).then(() => {
       buildTable();
       document.getElementById('csvInput').value = '';
