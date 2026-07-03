@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Controle de Tentativas de Contato - Mensal Definitivo</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    font-size: 12px;
+    background: #f0f2f5;
+    padding: 20px;
+  }
+  h1 {
+    font-size: 16px;
+    color: #1a1a2e;
+    margin-bottom: 16px;
+    font-weight: 600;
+  }
+  .toolbar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 14px;
+    align-items: center;
+    flex-wrap: wrap;
+    max-width: 1620px;
+  }
+  .toolbar input[type="text"], .toolbar input[type="month"] {
+    padding: 6px 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 12px;
+  }
+  .toolbar input[type="text"] { width: 240px; }
+  .toolbar input[type="month"] { width: 160px; font-weight: 600; border-color: #2563eb; }
+
+  .btn {
+    padding: 6px 14px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 500;
+  }
+  .btn-export  { background: #1e3a5f; color: white; }
+  .btn-update  { background: #16a34a; color: white; }
+  .btn-migrar  { background: #a855f7; color: white; font-weight: 600; box-shadow: 0 2px 6px rgba(168,85,247,0.4); }
+  .btn:hover { opacity: 0.88; }
+
+  .table-wrapper {
+    overflow-x: auto;
+    border-radius: 10px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.10);
+    width: max-content;
+    max-width: 100%;
+  }
+  table {
+    border-collapse: collapse;
+    background: #fff;
+    width: 1620px;
+  }
+  thead tr {
+    background: #1e3a5f;
+    color: #fff;
+  }
+  th {
+    padding: 10px 8px;
+    text-align: center;
+    font-weight: 600;
+    font-size: 11.5px;
+    white-space: nowrap;
+    border: 1px solid #2a4a74;
+  }
+  th.left { text-align: left; padding-left: 12px; }
+  th.sortable { cursor: pointer; background: #152943; user-select: none; }
+  th.sortable:hover { background: #2c4d75; }
+
+  td {
+    padding: 6px 8px;
+    border: 1px solid #e2e6ea;
+    vertical-align: middle;
+    text-align: center;
+  }
+  td.left { text-align: left; padding-left: 12px; }
+
+  tr:nth-child(even) td { background: #f7f9fc; }
+  tr:nth-child(odd)  td { background: #ffffff; }
+
+  tr.contato-sim td { background: #bbf7d0 !important; color: #14532d; }
+  tr.starter-nao td { background: #fee2e2 !important; color: #991b1b; }
+
+  .check-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+  }
+  .check-group input[type="checkbox"] {
+    width: 16px; height: 16px; cursor: pointer; accent-color: #2563eb;
+  }
+  .check-group input[type="date"] {
+    font-size: 10.5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 2px 4px;
+    width: 110px;
+    color: #333;
+  }
+
+  textarea.custom-textarea-input {
+    width: 100%;
+    height: 48px;
+    padding: 4px 6px;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    font-size: 11px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    resize: vertical;
+    text-align: left;
+    display: block;
+  }
+  textarea.custom-textarea-input:focus {
+    border-color: #2563eb;
+    outline: none;
+    box-shadow: 0 0 4px rgba(37,99,235,0.2);
+  }
+
+  input.hs-input {
+    width: 65px;
+    padding: 4px 6px;
+    font-size: 11.5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    text-align: center;
+  }
+
+  select.custom-sel {
+    font-size: 11.5px;
+    padding: 3px 6px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    cursor: pointer;
+    width: 100%;
+    max-width: 85px;
+  }
+  select.custom-sel.starter { background: #2563eb; color: white; font-weight: 600; border-color: #1d4ed8; }
+  select.custom-sel.basic { background: #0d9488; color: white; font-weight: 600; border-color: #0f766e; }
+  select.custom-sel.nao { background: #dc2626; color: white; font-weight: 600; border-color: #b91c1c; }
+  select.custom-sel.sim { background: #16a34a; color: white; font-weight: 600; border-color: #15803d; }
+
+  td.razao { width: 240px; max-width: 240px; font-size: 11px; white-space: normal; word-break: break-word; }
+  td.fantasia { width: 200px; max-width: 200px; font-size: 11px; white-space: normal; word-break: break-word; }
+
+  .counter {
+    font-size: 11px;
+    color: #555;
+    margin-left: auto;
+  }
+  .counter span { font-weight: 700; color: #16a34a; }
+
+  .print-note { margin-top: 10px; font-size: 11px; color: #888; }
+  
+  .update-section {
+    margin-top: 20px;
+    background: #fff;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+    max-width: 1620px;
+  }
+  .update-section textarea {
+    width: 100%;
+    height: 60px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-family: monospace;
+    font-size: 11px;
+    margin-bottom: 8px;
+    resize: vertical;
+  }
+
+  @media print {
+    body { background: white; padding: 0; }
+    .toolbar, .update-section { display: none; }
+    .table-wrapper { box-shadow: none; width: 100%; }
+    table { width: 100%; }
+    textarea.custom-textarea-input { border: none; height: auto; }
+    input.hs-input { border: none; background: transparent; }
+  }
+</style>
+</head>
+<body>
+
+<h1>📋 Controle de Tentativas de Contato — Obra Prima</h1>
+
+<div class="toolbar">
+  <input type="text" id="search" placeholder="🔍 Filtrar por razão social ou fantasia..." oninput="filterTable()">
+  
+  <label style="font-weight: 600; margin-left: 10px;">Mês de Referência:</label>
+  <input type="month" id="mesReferencia" onchange="onMonthChange()">
+
+  <button class="btn btn-export" onclick="window.print()">🖨️ Imprimir / Exportar PDF</button>
+  <div class="counter">Contatos efetivos no mês: <span id="count-sim">0</span> / <span id="count-total">0</span></div>
+</div>
+
+<div class="table-wrapper">
+  <table id="mainTable">
+    <thead>
+      <tr>
+        <th style="width:35px">#</th>
+        <th class="left" style="width:240px">Razão Social</th>
+        <th class="left" style="width:200px">Fantasia</th>
+        <th style="width:90px">MRR</th>
+        <th style="width:80px">HS</th>
+        <th class="sortable" style="width:110px" id="th-dias" onclick="toggleSortDias()">Últ. Tarefa (Dias) ↕</th>
+        <th style="width:110px">Minha Carteira?</th>
+        <th class="sortable" style="width:125px" id="th-t1" onclick="toggleSortDataTentativa('t1', 'th-t1', '1ª Tentativa')">1ª Tentativa ↕</th>
+        <th class="sortable" style="width:125px" id="th-t2" onclick="toggleSortDataTentativa('t2', 'th-t2', '2ª Tentativa')">2ª Tentativa ↕</th>
+        <th class="sortable" style="width:125px" id="th-t3" onclick="toggleSortDataTentativa('t3', 'th-t3', '3ª Tentativa')">3ª Tentativa ↕</th>
+        <th class="sortable" style="width:125px" id="th-tl" onclick="toggleSortDataTentativa('tl', 'th-tl', 'Ligação')">Ligação ↕</th>
+        <th style="width:180px">Canal de Contato</th>
+        <th class="sortable" style="width:100px" id="th-contato" onclick="toggleSortContato()">Contato Efetivo? ↕</th>
+      </tr>
+    </thead>
+    <tbody id="tableBody">
+    </tbody>
+  </table>
+</div>
+<p class="print-note">* Os dados de interação são salvos separadamente para cada mês escolhido no topo da página.</p>
+
+<div class="update-section">
+  <h3>🔄 Painel de Controle de Dados</h3>
+  <p style="color: #333; margin-bottom: 10px;">
+    <strong>MIGRAÇÃO AUTOMÁTICA:</strong> Clique no botão roxo abaixo para sincronizar e trazer as datas e marcações que você preencheu no arquivo antigo diretamente para o mês selecionado.
+  </p>
+  <div style="display: flex; gap: 10px; margin-bottom: 12px;">
+    <button class="btn btn-migrar" onclick="executarMigracaoDoAnexo()">🔮 Migrar Dados do Arquivo Anexado</button>
+  </div>
+  
+  <p style="color: #666; margin-bottom: 6px; font-size: 11px;">Área de Atualização manual por Planilha:</p>
+  <textarea id="csvInput" placeholder="Cole os dados das colunas da planilha aqui se quiser substituir a base de clientes no futuro..."></textarea>
+  <button class="btn btn-update" onclick="importFromPaste()">📋 Atualizar Lista por Planilha</button>
+</div>
+
+<script>
+let clients = [
+  ["Base Engenharia Civil Ltda", "BASE ENGENHARIA", "519,20", 10],
+  ["PUERTAS | ARQUITETURA E CONSTRUÇÕES", "PUERTAS | ARQUITETURA E CONSTRUÇÕES", "1.845,00", 7],
+  ["117 ENGENHARIA E GESTAO LTDA", "117 ENGENHARIA E GESTAO LTDA", "495,00", 0],
+  ["ARAUJO MORAES Engenharia", "ARAUJO MORAES Engenharia", "399,20", 7],
+  ["Engepe Construção Civil", "Engepe Construção Civil", "399,20", 13],
+  ["CONSTRUTORA MOURA CAMPOS LTDA", "CONSTRUTORA MOURA CAMPOS LTDA", "519,20", 7],
+  ["T2 Construtora LTDA", "T2 Construtora LTDA", "519,20", 7],
+  ["ANGELO KORCHAK ENGENHARIA", "ANGELO KORCHAK ENGENHARIA", "519,20", 15],
+  ["Macêdo Construtora Ltda", "Macêdo Construtora Ltda", "519,20", 11],
+  ["Diretriz Construtora Ltda", "Diretriz Construtora", "519,20", 35],
+  ["SPE MORADAS BENTO MARTINS 58F LTDA", "FW TERRA", "519,20", 12],
+  ["AUCA ENGENHARIA SUSTENTAVEL", "AUCA ENGENHARIA SUSTENTAVEL", "519,20", 12],
+  ["Escale Construtora Eireli", "Escale Construtora Eireli", "519,20", 13],
+  ["LAGOA FORTE ENGENHARIA LTDA", "LF ENGENHARIA", "440,00", 25],
+  ["P RESTAURO DE FACHADAS LTDA", "Project Restauro", "519,20", 6],
+  ["Teixeira Santos Construtora e Incorporadora Ltda", "Teixeira Santos Construtora e Incorporadora", "519,20", 19],
+  ["VP Serviços de Engenharia Eireli", "VP Engenharia", "519,20", 7],
+  ["NORTHUS ENGENHARIA e CONSTRUTORA LTDA", "NORTHUS", "519,20", 13],
+  ["Am&d Engenharia E Construcoes Ltda", "Am&d Engenharia E Construcoes Ltda", "519,20", 13],
+  ["Am&d Engenharia E Construcoes Ltda (2)", "Am&d Engenharia E Construcoes Ltda", "519,20", 13],
+  ["PGZ CONSULTORIA ENGENHARIA E CONSTRUÇÃO LTDA", "PGZ ENGENHARIA", "519,20", 6],
+  ["F. A. Bergamasco dos Santos - Construção Civil", "Construtora Bergamasco", "519,20", 19],
+  ["Tomasello Engenharia LTDA", "Tomasello Engenharia", "519,20", 23],
+  ["VCH Engenharia LTDA", "VCH Engenharia", "519,20", 21],
+  ["ALCALDE E BORGES ENGENHARIA LTDA", "ALCALDE E BORGES ENGENHARIA LTDA", "519,20", 14],
+  ["GD BAUEN ENGENHARIA LTDA", "GD BAUEN ENGENHARIA LTDA", "519,20", 13],
+  ["LION ARQUITETURA E REFORMAS", "LION ARQUITETURA E REFORMAS", "519,20", 18],
+  ["NK ENGENHARIA LTDA", "NK ENGENHARIA", "519,20", 7],
+  ["ASF", "ASF", "519,20", 28],
+  ["Torres Oliveira Arquitetura e Construções Eireli", "Torres Oliveira Arquitetura e Construções Eireli", "519,20", 13],
+  ["Engefisc Assessoria e Construções Ltda", "Engefisc Assessoria e Construções Ltda", "519,20", 21],
+  ["Engefisc Assessoria e Construções Ltda (2)", "Engefisc Assessoria e Construções Ltda", "519,20", 21],
+  ["RTG ENGENHARIA  P . S", "RTG ENGENHARIA  P . S", "519,20", 14],
+  ["One Consultoria de Engenharia e Obras LTDA", "ONE ELO", "519,20", 13],
+  ["E & R INCORPORADORA E CONSTRUTORA LTDA", "Renovare Negócios Imobiliários", "519,20", 11],
+  ["VPR CONSTRUÇÕES LTDA", "VPR Construções", "519,20", 21],
+  ["Avelar & Duarte Construções LTDA", "Avelar & Duarte Construções LTDA", "519,20", 21],
+  ["CONSTRUTORA TANTINI GARCIA LTDA", "CONSTRUTORA TANTINI GARCIA", "519,20", 15],
+  ["MXP CONSTRUTORA E INCORPORADORA LTDA", "MXP EMPREENDIMENTOS IMOBILIÁRIOS", "519,20", 22],
+  ["Consorce Engenharia e Construção Ltda", "Consorte Engenharia e Construção", "519,20", 21],
+  ["Triacon Construtora Ltda", "Triacon Construtora", "519,20", 4],
+  ["PROERG PROJETOS E EMPREENDIMENTOS LTDA", "PROERG ENGENHARIA E MEIO AMBIENTE", "519,20", 21],
+  ["EXEC CONSTRUTORA LTDA", "EXEC CONSTRUTORA", "519,20", 21],
+  ["INFURA Engenharia e Construção Ltda", "INFURA Construtora", "519,20", 14],
+  ["Imperial Engenharia e Construção LTDA", "Imperial Engenharia e Construções", "519,20", 15],
+  ["Minka Engenharia LTDA", "Minka Engenharia", "519,20", 21],
+  ["Inhaus Engenharia LTDA", "Inhaus Engenharia", "519,20", 21],
+  ["Inhaus Engenharia LTDA (2)", "Inhaus Engenharia", "519,20", 21],
+  ["Maston Construtora LTDA", "Maston Construtora", "519,20", 14],
+  ["SAMEDAL ENGENHARIA PROJETOS E CONSTRUCOES LTDA", "Officium Engenharia", "519,20", 14],
+  ["SAUK ENGENHARIA LTDA", "SAUK ENGENHARIA LTDA", "519,20", 35],
+  ["VHD ASSESSORIA E ENGENHARIA LTDA", "VHD CONSTRUTORA", "519,20", 25],
+  ["THEOS NATURA CONSTRUTORA LTDA", "THEOS INCORPORADORA", "519,20", 21],
+  ["GÁVEA ENGENHARIA.", "Gávea Engenharia", "519,20", 20],
+  ["Virgilio Corrêa", "Virgilio Corrêa", "519,20", 14],
+  ["Construtora e Engenharia Bruno Ferreira", "Bruno Ferreira construtora e engenharia", "519,20", 34],
+  ["Naves Engenharia", "Naves Engenharia", "519,20", 4],
+  ["Vitalle Incorporadora LTDA", "Vitalle Incorporadora LTDA", "519,20", 14],
+  ["Amilton Mota Júnior", "Amilton Mota Júnior", "519,20", 44],
+  ["HARDT&MARCELINO CONSTRUTORA LTDA", "HARDT&MARCELINO CONSTRUTORA LTDA", "519,20", 15],
+  ["Bergan Engenharia", "Bergan Engenharia", "519,20", 21],
+  ["Seed Engenharia e Construções", "Seed Engenharia e Construções", "519,20", 15],
+  ["STRAPASON PARTICIPACOES LTDA", "STRAPASON & GASPARIN", "519,20", 11],
+  ["C J PROJETOS E ENGENHARIA LTDA", "C J PROJETOS E ENGENHARIA LTDA", "519,20", 13],
+  ["ATSUL CONSTRUTORA E INCORPORADORA LTDA", "ATSUL CONSTRUTORA E INCORPORADORA", "459,20", 22],
+  ["Construtora Novva", "Novva Construtora", "519,20", 14],
+  ["Zoco e Zoco Empreendimentos Imobiliarios Ltda", "Zoco e Zoco Empreendimentos Imobiliarios Ltda", "519,20", 14],
+  ["V&R PROJETOS LTDA", "V&R PROJETOS LTDA", "519,20", 14],
+  ["LV CONSTRUTORA LTDA", "LV ENGENHARIA", "519,20", 7],
+  ["Hidroface Piscinas", "Hidroface Piscinas", "519,20", 19],
+  ["REIVÁX ENGENHARIA E PROJETOS", "REIVÁX ENGENHARIA E PROJETOS", "519,20", 25],
+  ["JLVM NEGOCIOS E PARTICIPACOES SOCIETARIAS LTDA", "JLVM", "519,20", 14],
+  ["HARMONIA E CONSTANCIA CONSTRUTORA LTDA", "HARMONIA E CONSTANCIA CONSTRUTORA LTDA", "519,20", 14],
+  ["Associacao Beneficente e Educacional de 1858", "ABE 1858", "519,20", 21],
+  ["AF Tecnologia em Energia", "AF Engenharia", "519,20", 14],
+  ["CONSTRUTORA CARRAMANHO LTDA", "CONSTRUTORA CARRAMANHO LTDA", "519,20", 20],
+  ["AJIL Solução e Engenharia", "LP MANUTENÇÃO E FACILITIES", "519,20", 21],
+  ["Toureiro Atacadista LTDA", "Toureiro Atacadista LTDA", "519,20", 14],
+  ["-CONSTRUFAST BRASIL LTDA", "-CONSTRUFAST BRASIL LTDA", "519,20", 14],
+  ["F GOMES INCORPORACAO E CONSTRUCAO LTDA", "BIMTEC", "519,20", 20],
+  ["ALLIPLAN CONSTRUTORA LTDA", "ALLIPLAN CONSTRUTORA", "519,20", 14],
+  ["VR Construção Manutenção e Serviços Ltda", "VR Construção", "519,20", 20],
+  ["REALIZE EMPREENDIMENTOS LIMITA", "REALIZE EMPREENDIMENTOS LIMITA", "519,20", 20],
+  ["REALIZE EMPREENDIMENTOS LIMITA (2)", "REALIZE EMPREENDIMENTOS LIMITA", "519,20", 20],
+  ["AGROBRAZ ENGENHARIA E CONSTRUÇÃO LTDA", "AGROBRAZ ENGENHARIA E CONSTRUÇÃO LTDA", "519,20", 12],
+  ["ENGECON SANTOS CONSTRUÇOES LTDA", "ENGECON SANTOS CONSTRUÇOES LTDA", "519,20", 14],
+  ["TESS EMPREENDIMENTOS LTDA", "Tess Empreendimentos", "519,20", 14],
+  ["JA CONSTRUCOES E INCORPORACOES LTDA", "JA CONSTRUCOES E INCORPORACOES LTDA", "519,20", 14],
+  ["W2 Manutenções, construções e reformas LTDA", "W2 Manutenções, construções e reformas LTDA", "519,20", 14],
+  ["AJB Arquitetura e Engenharia LTDA", "AJB Arquitetura e Engenharia LTDA", "519,20", 14],
+  ["MAIA SERVICO DE ENGENHARIA LTDA", "MARCOPOLO ENGENHARIA", "519,20", 14],
+  ["MM Engenharia e Mineração", "MM Engenharia e Mineração", "519,20", 14],
+  ["V Miranda Sousa", "V Miranda Sousa", "519,20", 14],
+  ["CGE ENGENHARIA LTDA", "CGE", "519,20", 14],
+  ["PLAY CONSTRUTORA E SERVIÇOS IMOBILIARIOS LTDA", "PLAY CONSTRUTORA E SERVIÇOS IMOBILIARIOS LTDA", "519,20", 14],
+  ["OPEAGA ENGENHARIA INTELIGENTE LTDA", "OPEAGA ENGENHARIA INTELIGENTE LTDA", "519,20", 14],
+  ["Ana Carolina Liber Arquitetura", "Ana Carolina Liber Arquitetura", "519,20", 14],
+  ["G J F EMPREENDIMENTOS LTDA", "G J F EMPREENDIMENTOS LTDA", "519,20", 14],
+  ["ZENTURE CONSTRUTORA LTDA", "ZENTURE CONSTRUTORA LTDA", "519,20", 14],
+  ["ARAÚNA ENGENHARIA LTDA", "ARAÚNA ENGENHARIA", "519,20", 14],
+  ["RDCS construções e Reformas", "RCS Engenharia", "479,20", 14],
+  ["WM SOLUCOES LTDA", "WM SOLUCOES LTDA", "519,20", 14],
+  ["J. SARAIVA ARQUITETURA", "J. SARAIVA ARQUITETURA", "519,20", 14],
+  ["Grupo PGO - Propósito Gestão de Obras", "Grupo PGO - Propósito Gestão de Obras", "519,20", 14],
+  ["FAM CONSTRUCOES LTDA", "FAM CONSTRUCOES LTDA", "519,20", 14],
+  ["FAM CONSTRUCOES LTDA (2)", "FAM CONSTRUCOES LTDA", "519,20", 14],
+  ["CONSTRUTORA ADRIATICA S/A", "CONSTRUTORA ADRIATICA S/A", "519,20", 14]
+];
+
+const STORAGE_KEY_INTERACTIONS = 'obra_prima_interactions_mensal_v1';
+const STORAGE_KEY_CLIENTS = 'obra_prima_clients_mensal_v1';
+
+let currentSortOrderDias = 'asc';
+let currentSortOrderContato = 'none';
+let dateSortStates = { t1: 'none', t2: 'none', t3: 'none', tl: 'none' };
+
+function setDefaultMonth() {
+  const hoje = new Date();
+  const ano = hoje.getFullYear();
+  const mes = String(hoje.getMonth() + 1).padStart(2, '0');
+  document.getElementById('mesReferencia').value = `${ano}-${mes}`;
+}
+
+function loadClients() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY_CLIENTS);
+    if (raw) clients = JSON.parse(raw);
+  } catch(e) { console.error("Erro ao carregar clientes", e); }
+}
+
+function loadInteractions() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY_INTERACTIONS);
+    return raw ? JSON.parse(raw) : {};
+  } catch { return {}; }
+}
+
+function obterTrimestreAno(mesStr) {
+  const parts = mesStr.split('-');
+  const ano = parseInt(parts[0]);
+  const mes = parseInt(parts[1]);
+
+  if (mes >= 3 && mes <= 5)   return { id: 'Mar-Mai', ano: ano };
+  if (mes >= 6 && mes <= 8)   return { id: 'Jun-Ago', ano: ano };
+  if (mes >= 9 && mes <= 11)  return { id: 'Set-Nov', ano: ano };
+  
+  const anoTrimestre = (mes === 1 || mes === 2) ? ano - 1 : ano;
+  return { id: 'Dez-Fev', ano: anoTrimestre };
+}
+
+function calcularMesAnterior(mesStr) {
+  const parts = mesStr.split('-');
+  let ano = parseInt(parts[0]);
+  let mes = parseInt(parts[1]) - 1;
+  if (mes === 0) {
+    mes = 12;
+    ano--;
+  }
+  return `${ano}-${String(mes).padStart(2, '0')}`;
+}
+
+function obterDadosClienteDoCache(savedInteractions, clientId, razao, mesKey) {
+  // Tenta ID Estável Novo (Índice)
+  const keyNova = `${clientId}_${mesKey}`;
+  if (savedInteractions[keyNova] && (savedInteractions[keyNova].foiPreenchido || savedInteractions[keyNova].starter)) {
+    return savedInteractions[keyNova];
+  }
+  // Fallback para o ID baseado no texto limpo (Formato Antigo do navegador)
+  const idAntigoStr = razao.toLowerCase().replace(/[^a-z0-9]/g, '');
+  const keyAntiga = `${idAntigoStr}_${mesKey}`;
+  if (savedInteractions[keyAntiga]) {
+    return savedInteractions[keyAntiga];
+  }
+  return null;
+}
+
+function saveData() {
+  const allInteractions = loadInteractions();
+  const mesSelecionado = document.getElementById('mesReferencia').value;
+
+  document.querySelectorAll('tr[data-client-id]').forEach(row => {
+    const clientId = row.dataset.clientId;
+    const storageKeyUnique = `${clientId}_${mesSelecionado}`;
+
+    allInteractions[storageKeyUnique] = {
+      starter: row.querySelector('.starter-sel').value,
+      hs: row.querySelector('.hs-input').value,
+      t1: row.querySelector('.t1-chk').checked,
+      t1d: row.querySelector('.t1-date').value,
+      t2: row.querySelector('.t2-chk').checked,
+      t2d: row.querySelector('.t2-date').value,
+      t3: row.querySelector('.t3-chk').checked,
+      t3d: row.querySelector('.t3-date').value,
+      tl: row.querySelector('.tl-chk').checked,
+      tld: row.querySelector('.tl-date').value,
+      canal: row.querySelector('.canal-textarea').value,
+      contato: row.querySelector('.contato-sel').value,
+      foiPreenchido: true
+    };
+  });
+  
+  localStorage.setItem(STORAGE_KEY_INTERACTIONS, JSON.stringify(allInteractions));
+  updateCounter();
+}
+
+function generateId(razao) {
+  const idx = clients.findIndex(c => c[0] === razao);
+  if (idx !== -1) return `client_${idx}`;
+  return 'c_' + razao.toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]/g, '_')
+    .replace(/_+/g, '_')
+    .substring(0, 40);
+}
+
+function buildTable() {
+  const savedInteractions = loadInteractions();
+  const mesSelecionado = document.getElementById('mesReferencia').value;
+  const trimAtual = obterTrimestreAno(mesSelecionado);
+
+  const tbody = document.getElementById('tableBody');
+  tbody.innerHTML = '';
+
+  clients.forEach(([razao, fantasia, mrr, dias], i) => {
+    const clientId = generateId(razao);
+    
+    // Tenta carregar dados já preenchidos para este mês específico (Dando suporte ao ID novo ou ID antigo)
+    const s = obterDadosClienteDoCache(savedInteractions, clientId, razao, mesSelecionado) || {};
+    
+    let starter = s.starter;
+    let hsValor = s.hs;
+    let contato = s.contato;
+
+    // Se o mês selecionado não possui dados manuais ainda, executa a herança retroativa
+    if (!s.foiPreenchido) {
+      let mesVarredura = calcularMesAnterior(mesSelecionado);
+      let achouDadosValidos = false;
+
+      while (true) {
+        const trimVarredura = obterTrimestreAno(mesVarredura);
+        
+        // Se quebrou o trimestre na busca reversa
+        if (trimVarredura.id !== trimAtual.id || trimVarredura.ano !== trimAtual.ano) {
+          const sLimite = obterDadosClienteDoCache(savedInteractions, clientId, razao, mesVarredura) || {};
+          starter = sLimite.starter || 'starter';
+          hsValor = '';
+          contato = 'nao';
+          break;
+        }
+
+        const sVarredura = obterDadosClienteDoCache(savedInteractions, clientId, razao, mesVarredura);
+        if (sVarredura && (sVarredura.foiPreenchido || sVarredura.starter)) {
+          starter = sVarredura.starter || 'starter';
+          hsValor = sVarredura.hs !== undefined ? sVarredura.hs : '';
+          contato = sVarredura.contato || 'nao';
+          achouDadosValidos = true;
+          break;
+        }
+
+        mesVarredura = calcularMesAnterior(mesVarredura);
+      }
+
+      if (!achouDadosValidos && starter === undefined) {
+        starter = 'starter';
+        hsValor = '';
+        contato = 'nao';
+      }
+    } else {
+      starter = starter || 'starter';
+      hsValor = hsValor !== undefined ? hsValor : '';
+      contato = contato || 'nao';
+    }
+
+    const t1 = s.foiPreenchido ? !!s.t1 : false;
+    const t1d = s.foiPreenchido ? s.t1d || '' : '';
+    const t2 = s.foiPreenchido ? !!s.t2 : false;
+    const t2d = s.foiPreenchido ? s.t2d || '' : '';
+    const t3 = s.foiPreenchido ? !!s.t3 : false;
+    const t3d = s.foiPreenchido ? s.t3d || '' : '';
+    const tl = s.foiPreenchido ? !!s.tl : false;
+    const tld = s.foiPreenchido ? s.tld || '' : '';
+    const canalTexto = s.foiPreenchido ? s.canal || '' : '';
+    
+    const valDias = dias !== undefined && dias !== null ? dias : '';
+
+    const tr = document.createElement('tr');
+    tr.dataset.clientId = clientId;
+    tr.dataset.dias = valDias;
+    tr.dataset.razao = razao.toLowerCase();
+    tr.dataset.fantasia = fantasia.toLowerCase();
+    
+    if (contato === 'sim') tr.classList.add('contato-sim');
+    if (starter === 'nao') tr.classList.add('starter-nao');
+
+    tr.innerHTML = `
+      <td>${i + 1}</td>
+      <td class="left razao">${escHtml(razao)}</td>
+      <td class="left fantasia">${escHtml(fantasia)}</td>
+      <td>R$ ${escHtml(mrr || '0,00')}</td>
+      <td>
+        <input type="number" class="hs-input" min="-100" max="100" step="any" value="${escHtml(hsValor)}" oninput="saveData()">
+      </td>
+      <td style="font-weight: 600;">${valDias}</td>
+      <td>
+        <select class="custom-sel starter-sel ${starter}" onchange="onStarterChange(this)">
+          <option value="starter" ${starter === 'starter' ? 'selected' : ''}>Starter</option>
+          <option value="basic" ${starter === 'basic' ? 'selected' : ''}>Basic</option>
+          <option value="nao" ${starter === 'nao' ? 'selected' : ''}>Não</option>
+        </select>
+      </td>
+      <td>
+        <div class="check-group">
+          <input type="checkbox" class="t1-chk" ${t1 ? 'checked' : ''}>
+          <input type="date" class="t1-date" value="${t1d}" oninput="onDateInput(this, '.t1-chk')">
+        </div>
+      </td>
+      <td>
+        <div class="check-group">
+          <input type="checkbox" class="t2-chk" ${t2 ? 'checked' : ''}>
+          <input type="date" class="t2-date" value="${t2d}" oninput="onDateInput(this, '.t2-chk')">
+        </div>
+      </td>
+      <td>
+        <div class="check-group">
+          <input type="checkbox" class="t3-chk" ${t3 ? 'checked' : ''}>
+          <input type="date" class="t3-date" value="${t3d}" oninput="onDateInput(this, '.t3-chk')">
+        </div>
+      </td>
+      <td>
+        <div class="check-group">
+          <input type="checkbox" class="tl-chk" ${tl ? 'checked' : ''}>
+          <input type="date" class="tl-date" value="${tld}" oninput="onDateInput(this, '.tl-chk')">
+        </div>
+      </td>
+      <td>
+        <textarea class="custom-textarea-input canal-textarea" oninput="saveData()">${escHtml(canalTexto)}</textarea>
+      </td>
+      <td>
+        <select class="custom-sel contato-sel ${contato}" onchange="onContatoChange(this)">
+          <option value="nao" ${contato === 'nao' ? 'selected' : ''}>Não</option>
+          <option value="sim" ${contato === 'sim' ? 'selected' : ''}>Sim</option>
+        </select>
+      </td>
+    `;
+
+    tbody.appendChild(tr);
+  });
+
+  updateCounter();
+}
+
+function onMonthChange() {
+  buildTable();
+}
+
+function resetaHeadersExcept(idAtivo) {
+  const headers = {
+    'th-dias': 'Últ. Tarefa (Dias) ↕',
+    'th-t1': '1ª Tentativa ↕',
+    'th-t2': '2ª Tentativa ↕',
+    'th-t3': '3ª Tentativa ↕',
+    'th-tl': 'Ligação ↕',
+    'th-contato': 'Contato Efetivo? ↕'
+  };
+  Object.keys(headers).forEach(id => {
+    if (id !== idAtivo) document.getElementById(id).innerHTML = headers[id];
+  });
+  if (idAtivo !== 'th-contato') currentSortOrderContato = 'none';
+  Object.keys(dateSortStates).forEach(k => {
+    if (`th-${k}` !== idAtivo) dateSortStates[k] = 'none';
+  });
+}
+
+function getInteractionValue(razao, campoData) {
+  const saved = loadInteractions();
+  const mes = document.getElementById('mesReferencia').value;
+  const clientId = generateId(razao);
+  const dataObj = obterDadosClienteDoCache(saved, clientId, razao, mes);
+  if (dataObj) {
+    if (campoData === 't1') return dataObj.t1d || '';
+    if (campoData === 't2') return dataObj.t2d || '';
+    if (campoData === 't3') return dataObj.t3d || '';
+    if (campoData === 'tl') return dataObj.tld || '';
+  }
+  return '';
+}
+
+// Correção estrutural na ordenação para evitar quebras de visualização
+function toggleSortDataTentativa(campo, thId, labelOriginal) {
+  const th = document.getElementById(thId);
+  resetaHeadersExcept(thId);
+
+  let proximoEstado = 'sem-data-topo';
+  if (dateSortStates[campo] === 'sem-data-topo') proximoEstado = 'antigo-novo';
+  else if (dateSortStates[campo] === 'antigo-novo') proximoEstado = 'novo-antigo';
+
+  dateSortStates[campo] = proximoEstado;
+
+  clients.sort((a, b) => {
+    const dataA = getInteractionValue(a[0], campo);
+    const dataB = getInteractionValue(b[0], campo);
+
+    if (proximoEstado === 'sem-data-topo') {
+      if (!dataA && dataB) return -1;
+      if (dataA && !dataB) return 1;
+      if (!dataA && !dataB) return (Number(b[3]) || 0) - (Number(a[3]) || 0);
+      return dataA.localeCompare(dataB);
+    }
+    
+    if (proximoEstado === 'antigo-novo') {
+      if (!dataA && dataB) return 1;
+      if (dataA && !dataB) return -1;
+      if (!dataA && !dataB) return (Number(b[3]) || 0) - (Number(a[3]) || 0);
+      return dataA.localeCompare(dataB);
+    }
+
+    if (proximoEstado === 'novo-antigo') {
+      if (!dataA && dataB) return 1;
+      if (dataA && !dataB) return -1;
+      if (!dataA && !dataB) return (Number(b[3]) || 0) - (Number(a[3]) || 0);
+      return dataB.localeCompare(dataA);
+    }
+  });
+
+  if (proximoEstado === 'sem-data-topo') th.innerHTML = `${labelOriginal} ⚪ Vazios Topo`;
+  if (proximoEstado === 'antigo-novo') th.innerHTML = `${labelOriginal} 🔼 Antigos`;
+  if (proximoEstado === 'novo-antigo') th.innerHTML = `${labelOriginal} 🔽 Novos`;
+
+  buildTable();
+}
+
+function toggleSortDias() {
+  const thDias = document.getElementById('th-dias');
+  resetaHeadersExcept('th-dias');
+
+  if (currentSortOrderDias === 'asc') {
+    clients.sort((a, b) => (Number(a[3]) || 0) - (Number(b[3]) || 0));
+    currentSortOrderDias = 'desc';
+    thDias.innerHTML = "Últ. Tarefa (Dias) 🔼";
+  } else {
+    clients.sort((a, b) => (Number(b[3]) || 0) - (Number(a[3]) || 0));
+    currentSortOrderDias = 'asc';
+    thDias.innerHTML = "Últ. Tarefa (Dias) 🔽";
+  }
+  buildTable();
+}
+
+function toggleSortContato() {
+  const thContato = document.getElementById('th-contato');
+  resetaHeadersExcept('th-contato');
+  const multiplicadorDias = (currentSortOrderDias === 'desc') ? 1 : -1;
+
+  clients.sort((a, b) => {
+    const saved = loadInteractions();
+    const mes = document.getElementById('mesReferencia').value;
+    const statusA = (obterDadosClienteDoCache(saved, generateId(a[0]), a[0], mes)?.contato) || 'nao';
+    const statusB = (obterDadosClienteDoCache(saved, generateId(b[0]), b[0], mes)?.contato) || 'nao';
+    
+    if (currentSortOrderContato !== 'sim-primeiro') {
+      if (statusA === 'sim' && statusB === 'nao') return -1;
+      if (statusA === 'nao' && statusB === 'sim') return 1;
+    } else {
+      if (statusA === 'nao' && statusB === 'sim') return -1;
+      if (statusA === 'sim' && statusB === 'nao') return 1;
+    }
+    return ((Number(a[3]) || 0) - (Number(b[3]) || 0)) * multiplicadorDias;
+  });
+
+  if (currentSortOrderContato !== 'sim-primeiro') {
+    currentSortOrderContato = 'sim-primeiro';
+    thContato.innerHTML = "Contato Efetivo? 🟢 Sim primeiro";
+  } else {
+    currentSortOrderContato = 'nao-primeiro';
+    thContato.innerHTML = "Contato Efetivo? 🔴 Não primeiro";
+  }
+  buildTable();
+}
+
+function executarMigracaoDoAnexo() {
+  try {
+    // Procura o histórico do arquivo antigo nos nomes de chaves antigos e novos
+    const rawAnexo = localStorage.getItem('obra_prima_interactions_v4') || localStorage.getItem(STORAGE_KEY_INTERACTIONS);
+    if (!rawAnexo) {
+      alert("Histórico antigo não detectado no cache local deste navegador.");
+      return;
+    }
+    const dadosAnexo = JSON.parse(rawAnexo);
+    const allInteractions = loadInteractions();
+    const mesSelecionado = document.getElementById('mesReferencia').value;
+
+    Object.keys(dadosAnexo).forEach(key => {
+      // Isola o ID removendo sufixo de data se houver na chave original
+      const clientId = key.includes('_202') ? key.split('_202')[0] : key;
+      const chaveDestinoMensal = `${clientId}_${mesSelecionado}`;
+      const antigoDado = dadosAnexo[key];
+      
+      let cart = 'starter';
+      if (antigoDado.starter === 'sim' || antigoDado.starter === true || antigoDado.starter === 'starter') cart = 'starter';
+      else if (antigoDado.starter === 'basic') cart = 'basic';
+      else if (antigoDado.starter === 'nao') cart = 'nao';
+      
+      allInteractions[chaveDestinoMensal] = {
+        starter: cart,
+        hs: '',
+        t1: false, t1d: '',
+        t2: false, t2d: '',
+        t3: false, t3d: '',
+        tl: false, tld: '',
+        canal: '',
+        contato: 'nao',
+        foiPreenchido: true
+      };
+    });
+
+    localStorage.setItem(STORAGE_KEY_INTERACTIONS, JSON.stringify(allInteractions));
+    buildTable();
+    alert("⚡ Sincronização da carteira realizada com sucesso! Dados antigos mapeados.");
+  } catch(e) {
+    alert("Falha ao processar a migração do banco de dados.");
+  }
+}
+
+function importFromPaste() {
+  const input = document.getElementById('csvInput').value.trim();
+  if (!input) { return alert("Cole os dados primeiro."); }
+  const lines = input.split('\n');
+  const newClients = [];
+  lines.forEach(line => {
+    const tokens = line.includes('\t') ? line.split('\t') : line.split(';');
+    if (tokens.length >= 2) {
+      const razao = tokens[0].trim();
+      const fantasia = tokens[1].trim();
+      const mrr = tokens[2] ? tokens[2].trim() : '0,00';
+      const dias = tokens[3] ? parseInt(tokens[3].trim().replace(/[^0-9]/g, '')) || 0 : 0;
+      if (razao) newClients.push([razao, fantasia, mrr, dias]);
+    }
+  });
+  if (newClients.length > 0) {
+    clients = newClients;
+    localStorage.setItem(STORAGE_KEY_CLIENTS, JSON.stringify(clients));
+    buildTable();
+    document.getElementById('csvInput').value = '';
+    alert("Lista de clientes atualizada com sucesso!");
+  } else {
+    alert("Nenhum dado válido pôde ser importado.");
+  }
+}
+
+function onDateInput(dateInput, chkSelector) {
+  const row = dateInput.closest('tr');
+  const chk = row.querySelector(chkSelector);
+  if (dateInput.value) chk.checked = true;
+  saveData();
+}
+
+function onStarterChange(sel) {
+  const row = sel.closest('tr');
+  sel.className = 'custom-sel starter-sel ' + sel.value;
+  if (sel.value === 'nao') row.classList.add('starter-nao');
+  else row.classList.remove('starter-nao');
+  saveData();
+}
+
+function onContatoChange(sel) {
+  const row = sel.closest('tr');
+  sel.className = 'custom-sel contato-sel ' + sel.value;
+  if (sel.value === 'sim') row.classList.add('contato-sim');
+  else row.classList.remove('contato-sim');
+  saveData();
+}
+
+function updateCounter() {
+  const total = clients.length;
+  const sims = document.querySelectorAll('tr[data-client-id].contato-sim').length;
+  document.getElementById('count-sim').textContent = sims;
+  document.getElementById('count-total').textContent = total;
+}
+
+function filterTable() {
+  const q = document.getElementById('search').value.toLowerCase();
+  document.querySelectorAll('tr[data-client-id]').forEach(tr => {
+    const match = tr.dataset.razao.includes(q) || tr.dataset.fantasia.includes(q);
+    tr.style.display = match ? '' : 'none';
+  });
+}
+
+function escHtml(s) {
+  if (!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function migrarChavesSeNecessario() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY_INTERACTIONS);
+    if (!raw) return;
+    const data = JSON.parse(raw);
+    const keys = Object.keys(data);
+    const temChaveAntiga = keys.some(k => !k.startsWith('client_') && !k.startsWith('c_'));
+    if (!temChaveAntiga) return;
+
+    const novoData = {};
+    keys.forEach(key => {
+      if (key.startsWith('client_') || key.startsWith('c_')) {
+        novoData[key] = data[key];
+        return;
+      }
+      const mes = key.slice(-7);
+      const nomeGerado = key.slice(0, key.length - 8);
+      const idx = clients.findIndex(c => {
+        const idAntigo = c[0].toLowerCase().replace(/[^a-z0-9]/g, '');
+        return idAntigo === nomeGerado;
+      });
+      if (idx !== -1) {
+        const novaChave = `client_${idx}_${mes}`;
+        if (!novoData[novaChave]) novoData[novaChave] = data[key];
+      } else {
+        novoData[key] = data[key];
+      }
+    });
+    localStorage.setItem(STORAGE_KEY_INTERACTIONS, JSON.stringify(novoData));
+    console.log('[Migração] Chaves de interação convertidas para formato estável.');
+  } catch(e) {
+    console.error('[Migração] Erro:', e);
+  }
+}
+
+setDefaultMonth();
+loadClients();
+migrarChavesSeNecessario();
+buildTable();
+</script>
+</body>
+</html>
