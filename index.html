@@ -438,13 +438,12 @@ function calcularMesAnterior(mesStr) {
   return `${ano}-${String(mes).padStart(2, '0')}`;
 }
 
-// 🔮 NOVO GERADOR DE IDENTIFICADOR ÚNICO E IMUTÁVEL BASEADO NO NOME DO CLIENTE
 function generateId(razao) {
   return 'c_' + razao.toLowerCase()
-    .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // Remove acentos
-    .replace(/[^a-z0-9]/g, '_')                      // Substitui espaços e símbolos por "_"
-    .replace(/_+/g, '_')                             // Evita múltiplos "_" seguidos
-    .substring(0, 50);                               // Limita o tamanho máximo da chave
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]/g, '_')
+    .replace(/_+/g, '_')
+    .substring(0, 50);
 }
 
 function obterDadosClienteDoCache(clientId, razao, mesKey) {
@@ -452,7 +451,6 @@ function obterDadosClienteDoCache(clientId, razao, mesKey) {
   if (memoryInteractions[keyNova] && (memoryInteractions[keyNova].foiPreenchido || memoryInteractions[keyNova].starter)) {
     return memoryInteractions[keyNova];
   }
-  // Mapeamento retroativo de compatibilidade para evitar perda de dados
   const idAntigoStr = razao.toLowerCase().replace(/[^a-z0-9]/g, '');
   const keyAntiga = `${idAntigoStr}_${mesKey}`;
   if (memoryInteractions[keyAntiga]) {
@@ -622,6 +620,8 @@ function buildTable() {
     tbody.appendChild(tr);
   });
 
+  // Reaplica a barra de filtro após renderizar/ordenar para não sumir com buscas ativas
+  filterTable();
   updateCounter();
 }
 
@@ -853,8 +853,10 @@ function updateCounter() {
 
 function filterTable() {
   const q = document.getElementById('search').value.toLowerCase();
-  document.querySelectorAll('tr[data-client-id]').forEach(tr => {
-    const match = tr.dataset.razao.includes(q) || tr.dataset.fantasia.includes(q);
+  document.querySelectorAll('tbody tr').forEach(tr => {
+    const razao = tr.querySelector('.razao').textContent.toLowerCase();
+    const fantasia = tr.querySelector('.fantasia').textContent.toLowerCase();
+    const match = razao.includes(q) || fantasia.includes(q);
     tr.style.display = match ? '' : 'none';
   });
 }
