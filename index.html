@@ -471,6 +471,14 @@ function generateId(razao) {
     .substring(0, 50);
 }
 
+// 🔮 FUNÇÃO AUXILIAR DE LIMPEZA DE TEXTO PARA CRUZAMENTO ULTRA RESILIENTE
+function limparTextoParaComparacao(str) {
+  if (!str) return '';
+  return str.toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // Remove acentos
+    .replace(/[^a-z0-9]/g, '');                       // Remove espaços, traços, pontos e vírgulas
+}
+
 function obterDadosClienteDoCache(clientId, razao, mesKey) {
   const keyNova = `${clientId}_${mesKey}`;
   if (memoryInteractions[keyNova] && (memoryInteractions[keyNova].foiPreenchido || memoryInteractions[keyNova].starter)) {
@@ -661,13 +669,16 @@ function importCoberturasEfetivas() {
   lines.forEach(line => {
     const tokens = line.includes('\t') ? line.split('\t') : line.split(';');
     if (tokens.length >= 3) {
-      const razaoPlanilha = tokens[0].trim();
-      const fantasiaPlanilha = tokens[1].trim();
+      const razaoPlanilha = limparTextoParaComparacao(tokens[0].trim());
+      const fantasiaPlanilha = limparTextoParaComparacao(tokens[1].trim());
       const tipoCobertura = tokens[2].trim().toLowerCase();
 
+      // Busca usando a função de limpeza ultra-resiliente
       const indexCliente = clients.findIndex(c => 
-        c[0].toLowerCase() === razaoPlanilha.toLowerCase() || 
-        c[1].toLowerCase() === fantasiaPlanilha.toLowerCase()
+        limparTextoParaComparacao(c[0]) === razaoPlanilha || 
+        limparTextoParaComparacao(c[1]) === fantasiaPlanilha ||
+        razaoPlanilha.includes(limparTextoParaComparacao(c[1])) ||
+        limparTextoParaComparacao(c[0]).includes(razaoPlanilha)
       );
 
       if (indexCliente !== -1) {
@@ -895,7 +906,7 @@ function importFromPaste() {
     localStorage.setItem(STORAGE_KEY_CLIENTS, JSON.stringify(clients));
     buildTable();
     document.getElementById('csvInput').value = '';
-    alert("Lista de clientes updated com sucesso!");
+    alert("Lista de clientes atualizada com sucesso!");
   } else {
     alert("Nenhum dado válido pôde ser importado.");
   }
