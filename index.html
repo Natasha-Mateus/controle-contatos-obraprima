@@ -3,18 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Controle de Tentativas de Contato - Mensal Definitivo</title>
+<title>Controle de Tentativas de Contato - Mensal Definitivo (Dark)</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
     font-family: 'Segoe UI', Arial, sans-serif;
     font-size: 12px;
-    background: #f0f2f5;
+    background: #0f172a; /* Fundo Slate Escuro */
+    color: #e2e8f0; /* Texto Claro */
     padding: 20px;
   }
   h1 {
     font-size: 16px;
-    color: #1a1a2e;
+    color: #f8fafc;
     margin-bottom: 16px;
     font-weight: 600;
   }
@@ -28,12 +29,14 @@
   }
   .toolbar input[type="text"], .toolbar input[type="month"] {
     padding: 6px 10px;
-    border: 1px solid #ccc;
+    border: 1px solid #334155;
+    background: #1e293b;
+    color: #f8fafc;
     border-radius: 6px;
     font-size: 12px;
   }
   .toolbar input[type="text"] { width: 240px; }
-  .toolbar input[type="month"] { width: 160px; font-weight: 600; border-color: #2563eb; }
+  .toolbar input[type="month"] { width: 160px; font-weight: 600; border-color: #3b82f6; }
 
   .btn {
     padding: 6px 14px;
@@ -43,26 +46,27 @@
     font-size: 12px;
     font-weight: 500;
   }
-  .btn-export  { background: #1e3a5f; color: white; }
-  .btn-update  { background: #16a34a; color: white; }
-  .btn-migrar  { background: #a855f7; color: white; font-weight: 600; box-shadow: 0 2px 6px rgba(168,85,247,0.4); }
+  .btn-export  { background: #334155; color: #f8fafc; border: 1px solid #475569; }
+  .btn-update  { background: #15803d; color: white; }
+  .btn-migrar  { background: #7e22ce; color: white; font-weight: 600; box-shadow: 0 2px 6px rgba(126,34,206,0.4); }
   .btn:hover { opacity: 0.88; }
 
   .table-wrapper {
     overflow-x: auto;
     border-radius: 10px;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.10);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
     width: max-content;
     max-width: 100%;
+    border: 1px solid #334155;
   }
   table {
     border-collapse: collapse;
-    background: #fff;
+    background: #1e293b;
     width: 1620px;
   }
   thead tr {
-    background: #1e3a5f;
-    color: #fff;
+    background: #0f172a;
+    color: #f8fafc;
   }
   th {
     padding: 10px 8px;
@@ -70,25 +74,28 @@
     font-weight: 600;
     font-size: 11.5px;
     white-space: nowrap;
-    border: 1px solid #2a4a74;
+    border: 1px solid #334155;
   }
   th.left { text-align: left; padding-left: 12px; }
-  th.sortable { cursor: pointer; background: #152943; user-select: none; }
-  th.sortable:hover { background: #2c4d75; }
+  th.sortable { cursor: pointer; background: #0f172a; user-select: none; color: #3b82f6; }
+  th.sortable:hover { background: #1e293b; }
 
   td {
     padding: 6px 8px;
-    border: 1px solid #e2e6ea;
+    border: 1px solid #334155;
     vertical-align: middle;
     text-align: center;
+    color: #cbd5e1;
   }
   td.left { text-align: left; padding-left: 12px; }
 
-  tr:nth-child(even) td { background: #f7f9fc; }
-  tr:nth-child(odd)  td { background: #ffffff; }
+  tr:nth-child(even) td { background: #1e293b; }
+  tr:nth-child(odd)  td { background: #161e2e; }
 
-  tr.contato-sim td { background: #bbf7d0 !important; color: #14532d; }
-  tr.starter-nao td { background: #fee2e2 !important; color: #991b1b; }
+  /* Destaques de linha adaptados para o Modo Escuro */
+  tr.contato-sim td { background: #052e16 !important; color: #4ade80 !important; }
+  tr.contato-sim td border { border-color: #14532d; }
+  tr.starter-nao td { background: #451a03 !important; color: #f87171 !important; }
 
   .check-group {
     display: flex;
@@ -97,15 +104,16 @@
     gap: 3px;
   }
   .check-group input[type="checkbox"] {
-    width: 16px; height: 16px; cursor: pointer; accent-color: #2563eb;
+    width: 16px; height: 16px; cursor: pointer; accent-color: #3b82f6;
   }
   .check-group input[type="date"] {
     font-size: 10.5px;
-    border: 1px solid #ccc;
+    background: #0f172a;
+    color: #f8fafc;
+    border: 1px solid #334155;
     border-radius: 4px;
     padding: 2px 4px;
     width: 110px;
-    color: #333;
   }
 
   textarea.custom-textarea-input {
@@ -114,23 +122,26 @@
     padding: 4px 6px;
     font-family: 'Segoe UI', Arial, sans-serif;
     font-size: 11px;
-    border: 1px solid #ccc;
+    background: #0f172a;
+    color: #f8fafc;
+    border: 1px solid #334155;
     border-radius: 5px;
     resize: vertical;
     text-align: left;
     display: block;
   }
   textarea.custom-textarea-input:focus {
-    border-color: #2563eb;
+    border-color: #3b82f6;
     outline: none;
-    box-shadow: 0 0 4px rgba(37,99,235,0.2);
   }
 
   input.hs-input {
     width: 65px;
     padding: 4px 6px;
     font-size: 11.5px;
-    border: 1px solid #ccc;
+    background: #0f172a;
+    color: #f8fafc;
+    border: 1px solid #334155;
     border-radius: 5px;
     text-align: center;
   }
@@ -139,41 +150,44 @@
     font-size: 11.5px;
     padding: 3px 6px;
     border-radius: 5px;
-    border: 1px solid #ccc;
+    border: 1px solid #334155;
     cursor: pointer;
     width: 100%;
     max-width: 85px;
   }
-  select.custom-sel.starter { background: #2563eb; color: white; font-weight: 600; border-color: #1d4ed8; }
-  select.custom-sel.basic { background: #0d9488; color: white; font-weight: 600; border-color: #0f766e; }
-  select.custom-sel.nao { background: #dc2626; color: white; font-weight: 600; border-color: #b91c1c; }
-  select.custom-sel.sim { background: #16a34a; color: white; font-weight: 600; border-color: #15803d; }
+  select.custom-sel.starter { background: #2563eb; color: white; font-weight: 600; }
+  select.custom-sel.basic { background: #0d9488; color: white; font-weight: 600; }
+  select.custom-sel.nao { background: #b91c1c; color: white; font-weight: 600; }
+  select.custom-sel.sim { background: #16a34a; color: white; font-weight: 600; }
 
   td.razao { width: 240px; max-width: 240px; font-size: 11px; white-space: normal; word-break: break-word; }
   td.fantasia { width: 200px; max-width: 200px; font-size: 11px; white-space: normal; word-break: break-word; }
 
   .counter {
     font-size: 11px;
-    color: #555;
+    color: #94a3b8;
     margin-left: auto;
   }
-  .counter span { font-weight: 700; color: #16a34a; }
+  .counter span { font-weight: 700; color: #4ade80; }
 
-  .print-note { margin-top: 10px; font-size: 11px; color: #888; }
+  .print-note { margin-top: 10px; font-size: 11px; color: #64748b; }
   
   .update-section {
     margin-top: 20px;
-    background: #fff;
+    background: #1e293b;
     padding: 15px;
     border-radius: 10px;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+    border: 1px solid #334155;
     max-width: 1620px;
   }
+  .update-section h3 { color: #f8fafc; margin-bottom: 8px;}
   .update-section textarea {
     width: 100%;
     height: 60px;
     padding: 10px;
-    border: 1px solid #ccc;
+    background: #0f172a;
+    color: #f8fafc;
+    border: 1px solid #334155;
     border-radius: 6px;
     font-family: monospace;
     font-size: 11px;
@@ -182,14 +196,17 @@
   }
 
   @media print {
-    body { background: white; padding: 0; }
+    body { background: white; color: black; padding: 0; }
     .toolbar, .update-section { display: none; }
-    .table-wrapper { box-shadow: none; width: 100%; }
+    .table-wrapper { box-shadow: none; border: none; width: 100%; }
     table { width: 100%; }
-    textarea.custom-textarea-input { border: none; height: auto; }
-    input.hs-input { border: none; background: transparent; }
+    textarea.custom-textarea-input { border: none; height: auto; background: transparent; color: black; }
+    input.hs-input { border: none; background: transparent; color: black; }
   }
 </style>
+
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
 </head>
 <body>
 
@@ -198,7 +215,7 @@
 <div class="toolbar">
   <input type="text" id="search" placeholder="🔍 Filtrar por razão social ou fantasia..." oninput="filterTable()">
   
-  <label style="font-weight: 600; margin-left: 10px;">Mês de Referência:</label>
+  <label style="font-weight: 600; margin-left: 10px; color: #94a3b8;">Mês de Referência:</label>
   <input type="month" id="mesReferencia" onchange="onMonthChange()">
 
   <button class="btn btn-export" onclick="window.print()">🖨️ Imprimir / Exportar PDF</button>
@@ -228,23 +245,38 @@
     </tbody>
   </table>
 </div>
-<p class="print-note">* Os dados de interação são salvos separadamente para cada mês escolhido no topo da página.</p>
+<p class="print-note">* Os dados de interação estão protegidos e sincronizados em tempo real na nuvem do Firebase.</p>
 
 <div class="update-section">
   <h3>🔄 Painel de Controle de Dados</h3>
-  <p style="color: #333; margin-bottom: 10px;">
+  <p style="color: #cbd5e1; margin-bottom: 10px;">
     <strong>MIGRAÇÃO AUTOMÁTICA:</strong> Clique no botão roxo abaixo para sincronizar e trazer as datas e marcações que você preencheu no arquivo antigo diretamente para o mês selecionado.
   </p>
   <div style="display: flex; gap: 10px; margin-bottom: 12px;">
     <button class="btn btn-migrar" onclick="executarMigracaoDoAnexo()">🔮 Migrar Dados do Arquivo Anexado</button>
   </div>
   
-  <p style="color: #666; margin-bottom: 6px; font-size: 11px;">Área de Atualização manual por Planilha:</p>
+  <p style="color: #94a3b8; margin-bottom: 6px; font-size: 11px;">Área de Atualização manual por Planilha:</p>
   <textarea id="csvInput" placeholder="Cole os dados das colunas da planilha aqui se quiser substituir a base de clientes no futuro..."></textarea>
   <button class="btn btn-update" onclick="importFromPaste()">📋 Atualizar Lista por Planilha</button>
 </div>
 
 <script>
+// Credenciais do seu Firebase coletadas na imagem enviada
+const firebaseConfig = {
+  apiKey: "AIzaSyB_8QL703CHVcyezZ9LrPkyvYY0d1cYdCo",
+  authDomain: "controle-tentativas-obraprima.firebaseapp.com",
+  databaseURL: "https://controle-tentativas-obraprima-default-rtdb.firebaseio.com",
+  projectId: "controle-tentativas-obraprima",
+  storageBucket: "controle-tentativas-obraprima.appspot.com",
+  messagingSenderId: "6309641144",
+  appId: "1:6309641144:web:85caa158b49fa82ab9d48d"
+};
+
+// Inicializa o Firebase
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
 let clients = [
   ["Base Engenharia Civil Ltda", "BASE ENGENHARIA", "519,20", 10],
   ["PUERTAS | ARQUITETURA E CONSTRUÇÕES", "PUERTAS | ARQUITETURA E CONSTRUÇÕES", "1.845,00", 7],
@@ -355,8 +387,8 @@ let clients = [
   ["CONSTRUTORA ADRIATICA S/A", "CONSTRUTORA ADRIATICA S/A", "519,20", 14]
 ];
 
-const STORAGE_KEY_INTERACTIONS = 'obra_prima_interactions_mensal_v1';
 const STORAGE_KEY_CLIENTS = 'obra_prima_clients_mensal_v1';
+let memoryInteractions = {}; // Cache global na memória para evitar lentidões
 
 let currentSortOrderDias = 'asc';
 let currentSortOrderContato = 'none';
@@ -376,11 +408,15 @@ function loadClients() {
   } catch(e) { console.error("Erro ao carregar clientes", e); }
 }
 
-function loadInteractions() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY_INTERACTIONS);
-    return raw ? JSON.parse(raw) : {};
-  } catch { return {}; }
+// ☁️ BUSCA CENTRALIZADA NA NUVEM (FIREBASE)
+function carregarDadosDaNuvem(callback) {
+  db.ref('interacoes').once('value').then((snapshot) => {
+    memoryInteractions = snapshot.val() || {};
+    if (callback) callback();
+  }).catch((e) => {
+    console.error("Erro ao ler do Firebase:", e);
+    if (callback) callback();
+  });
 }
 
 function obterTrimestreAno(mesStr) {
@@ -407,30 +443,29 @@ function calcularMesAnterior(mesStr) {
   return `${ano}-${String(mes).padStart(2, '0')}`;
 }
 
-function obterDadosClienteDoCache(savedInteractions, clientId, razao, mesKey) {
-  // Tenta ID Estável Novo (Índice)
+function obterDadosClienteDoCache(clientId, razao, mesKey) {
   const keyNova = `${clientId}_${mesKey}`;
-  if (savedInteractions[keyNova] && (savedInteractions[keyNova].foiPreenchido || savedInteractions[keyNova].starter)) {
-    return savedInteractions[keyNova];
+  if (memoryInteractions[keyNova] && (memoryInteractions[keyNova].foiPreenchido || memoryInteractions[keyNova].starter)) {
+    return memoryInteractions[keyNova];
   }
-  // Fallback para o ID baseado no texto limpo (Formato Antigo do navegador)
   const idAntigoStr = razao.toLowerCase().replace(/[^a-z0-9]/g, '');
   const keyAntiga = `${idAntigoStr}_${mesKey}`;
-  if (savedInteractions[keyAntiga]) {
-    return savedInteractions[keyAntiga];
+  if (memoryInteractions[keyAntiga]) {
+    return memoryInteractions[keyAntiga];
   }
   return null;
 }
 
+// ☁️ SALVAMENTO DIRETO NA NUVEM (FIREBASE)
 function saveData() {
-  const allInteractions = loadInteractions();
   const mesSelecionado = document.getElementById('mesReferencia').value;
+  const updates = {};
 
   document.querySelectorAll('tr[data-client-id]').forEach(row => {
     const clientId = row.dataset.clientId;
     const storageKeyUnique = `${clientId}_${mesSelecionado}`;
 
-    allInteractions[storageKeyUnique] = {
+    const dataObj = {
       starter: row.querySelector('.starter-sel').value,
       hs: row.querySelector('.hs-input').value,
       t1: row.querySelector('.t1-chk').checked,
@@ -445,10 +480,14 @@ function saveData() {
       contato: row.querySelector('.contato-sel').value,
       foiPreenchido: true
     };
+
+    memoryInteractions[storageKeyUnique] = dataObj;
+    updates['/interacoes/' + storageKeyUnique] = dataObj;
   });
   
-  localStorage.setItem(STORAGE_KEY_INTERACTIONS, JSON.stringify(allInteractions));
-  updateCounter();
+  db.ref().update(updates).then(() => {
+    updateCounter();
+  }).catch((e) => console.error("Erro ao salvar no Firebase:", e));
 }
 
 function generateId(razao) {
@@ -462,7 +501,6 @@ function generateId(razao) {
 }
 
 function buildTable() {
-  const savedInteractions = loadInteractions();
   const mesSelecionado = document.getElementById('mesReferencia').value;
   const trimAtual = obterTrimestreAno(mesSelecionado);
 
@@ -471,15 +509,12 @@ function buildTable() {
 
   clients.forEach(([razao, fantasia, mrr, dias], i) => {
     const clientId = generateId(razao);
-    
-    // Tenta carregar dados já preenchidos para este mês específico (Dando suporte ao ID novo ou ID antigo)
-    const s = obterDadosClienteDoCache(savedInteractions, clientId, razao, mesSelecionado) || {};
+    const s = obterDadosClienteDoCache(clientId, razao, mesSelecionado) || {};
     
     let starter = s.starter;
     let hsValor = s.hs;
     let contato = s.contato;
 
-    // Se o mês selecionado não possui dados manuais ainda, executa a herança retroativa
     if (!s.foiPreenchido) {
       let mesVarredura = calcularMesAnterior(mesSelecionado);
       let achouDadosValidos = false;
@@ -487,16 +522,15 @@ function buildTable() {
       while (true) {
         const trimVarredura = obterTrimestreAno(mesVarredura);
         
-        // Se quebrou o trimestre na busca reversa
         if (trimVarredura.id !== trimAtual.id || trimVarredura.ano !== trimAtual.ano) {
-          const sLimite = obterDadosClienteDoCache(savedInteractions, clientId, razao, mesVarredura) || {};
+          const sLimite = obterDadosClienteDoCache(clientId, razao, mesVarredura) || {};
           starter = sLimite.starter || 'starter';
           hsValor = '';
           contato = 'nao';
           break;
         }
 
-        const sVarredura = obterDadosClienteDoCache(savedInteractions, clientId, razao, mesVarredura);
+        const sVarredura = obterDadosClienteDoCache(clientId, razao, mesVarredura);
         if (sVarredura && (sVarredura.foiPreenchido || sVarredura.starter)) {
           starter = sVarredura.starter || 'starter';
           hsValor = sVarredura.hs !== undefined ? sVarredura.hs : '';
@@ -620,10 +654,9 @@ function resetaHeadersExcept(idAtivo) {
 }
 
 function getInteractionValue(razao, campoData) {
-  const saved = loadInteractions();
   const mes = document.getElementById('mesReferencia').value;
   const clientId = generateId(razao);
-  const dataObj = obterDadosClienteDoCache(saved, clientId, razao, mes);
+  const dataObj = obterDadosClienteDoCache(clientId, razao, mes);
   if (dataObj) {
     if (campoData === 't1') return dataObj.t1d || '';
     if (campoData === 't2') return dataObj.t2d || '';
@@ -633,7 +666,6 @@ function getInteractionValue(razao, campoData) {
   return '';
 }
 
-// Correção estrutural na ordenação para evitar quebras de visualização
 function toggleSortDataTentativa(campo, thId, labelOriginal) {
   const th = document.getElementById(thId);
   resetaHeadersExcept(thId);
@@ -699,10 +731,9 @@ function toggleSortContato() {
   const multiplicadorDias = (currentSortOrderDias === 'desc') ? 1 : -1;
 
   clients.sort((a, b) => {
-    const saved = loadInteractions();
     const mes = document.getElementById('mesReferencia').value;
-    const statusA = (obterDadosClienteDoCache(saved, generateId(a[0]), a[0], mes)?.contato) || 'nao';
-    const statusB = (obterDadosClienteDoCache(saved, generateId(b[0]), b[0], mes)?.contato) || 'nao';
+    const statusA = (obterDadosClienteDoCache(generateId(a[0]), a[0], mes)?.contato) || 'nao';
+    const statusB = (obterDadosClienteDoCache(generateId(b[0]), b[0], mes)?.contato) || 'nao';
     
     if (currentSortOrderContato !== 'sim-primeiro') {
       if (statusA === 'sim' && statusB === 'nao') return -1;
@@ -726,18 +757,16 @@ function toggleSortContato() {
 
 function executarMigracaoDoAnexo() {
   try {
-    // Procura o histórico do arquivo antigo nos nomes de chaves antigos e novos
-    const rawAnexo = localStorage.getItem('obra_prima_interactions_v4') || localStorage.getItem(STORAGE_KEY_INTERACTIONS);
+    const rawAnexo = localStorage.getItem('obra_prima_interactions_v4') || localStorage.getItem('obra_prima_interactions_mensal_v1');
     if (!rawAnexo) {
       alert("Histórico antigo não detectado no cache local deste navegador.");
       return;
     }
     const dadosAnexo = JSON.parse(rawAnexo);
-    const allInteractions = loadInteractions();
     const mesSelecionado = document.getElementById('mesReferencia').value;
+    const updates = {};
 
     Object.keys(dadosAnexo).forEach(key => {
-      // Isola o ID removendo sufixo de data se houver na chave original
       const clientId = key.includes('_202') ? key.split('_202')[0] : key;
       const chaveDestinoMensal = `${clientId}_${mesSelecionado}`;
       const antigoDado = dadosAnexo[key];
@@ -747,7 +776,7 @@ function executarMigracaoDoAnexo() {
       else if (antigoDado.starter === 'basic') cart = 'basic';
       else if (antigoDado.starter === 'nao') cart = 'nao';
       
-      allInteractions[chaveDestinoMensal] = {
+      const dataObj = {
         starter: cart,
         hs: '',
         t1: false, t1d: '',
@@ -758,11 +787,15 @@ function executarMigracaoDoAnexo() {
         contato: 'nao',
         foiPreenchido: true
       };
+
+      memoryInteractions[chaveDestinoMensal] = dataObj;
+      updates['/interacoes/' + chaveDestinoMensal] = dataObj;
     });
 
-    localStorage.setItem(STORAGE_KEY_INTERACTIONS, JSON.stringify(allInteractions));
-    buildTable();
-    alert("⚡ Sincronização da carteira realizada com sucesso! Dados antigos mapeados.");
+    db.ref().update(updates).then(() => {
+      buildTable();
+      alert("⚡ Sincronização e migração enviadas com sucesso para a nuvem!");
+    });
   } catch(e) {
     alert("Falha ao processar a migração do banco de dados.");
   }
@@ -837,45 +870,12 @@ function escHtml(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-function migrarChavesSeNecessario() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY_INTERACTIONS);
-    if (!raw) return;
-    const data = JSON.parse(raw);
-    const keys = Object.keys(data);
-    const temChaveAntiga = keys.some(k => !k.startsWith('client_') && !k.startsWith('c_'));
-    if (!temChaveAntiga) return;
-
-    const novoData = {};
-    keys.forEach(key => {
-      if (key.startsWith('client_') || key.startsWith('c_')) {
-        novoData[key] = data[key];
-        return;
-      }
-      const mes = key.slice(-7);
-      const nomeGerado = key.slice(0, key.length - 8);
-      const idx = clients.findIndex(c => {
-        const idAntigo = c[0].toLowerCase().replace(/[^a-z0-9]/g, '');
-        return idAntigo === nomeGerado;
-      });
-      if (idx !== -1) {
-        const novaChave = `client_${idx}_${mes}`;
-        if (!novoData[novaChave]) novoData[novaChave] = data[key];
-      } else {
-        novoData[key] = data[key];
-      }
-    });
-    localStorage.setItem(STORAGE_KEY_INTERACTIONS, JSON.stringify(novoData));
-    console.log('[Migração] Chaves de interação convertidas para formato estável.');
-  } catch(e) {
-    console.error('[Migração] Erro:', e);
-  }
-}
-
+// Inicialização segura puxando primeiro da Nuvem antes de desenhar a tela
 setDefaultMonth();
 loadClients();
-migrarChavesSeNecessario();
-buildTable();
+carregarDadosDaNuvem(() => {
+  buildTable();
+});
 </script>
 </body>
 </html>
