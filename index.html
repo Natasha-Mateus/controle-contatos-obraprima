@@ -9,8 +9,8 @@
   body {
     font-family: 'Segoe UI', Arial, sans-serif;
     font-size: 12px;
-    background: #0f172a; /* Fundo Slate Escuro */
-    color: #e2e8f0; /* Texto Claro */
+    background: #0f172a; 
+    color: #e2e8f0; 
     padding: 20px;
   }
   h1 {
@@ -92,9 +92,7 @@
   tr:nth-child(even) td { background: #1e293b; }
   tr:nth-child(odd)  td { background: #161e2e; }
 
-  /* Destaques de linha adaptados para o Modo Escuro */
   tr.contato-sim td { background: #052e16 !important; color: #4ade80 !important; }
-  tr.contato-sim td border { border-color: #14532d; }
   tr.starter-nao td { background: #451a03 !important; color: #f87171 !important; }
 
   .check-group {
@@ -262,7 +260,6 @@
 </div>
 
 <script>
-// Credenciais do seu Firebase coletadas na imagem enviada
 const firebaseConfig = {
   apiKey: "AIzaSyB_8QL703CHVcyezZ9LrPkyvYY0d1cYdCo",
   authDomain: "controle-tentativas-obraprima.firebaseapp.com",
@@ -273,7 +270,6 @@ const firebaseConfig = {
   appId: "1:6309641144:web:85caa158b49fa82ab9d48d"
 };
 
-// Inicializa o Firebase
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
@@ -333,7 +329,7 @@ let clients = [
   ["THEOS NATURA CONSTRUTORA LTDA", "THEOS INCORPORADORA", "519,20", 21],
   ["GÁVEA ENGENHARIA.", "Gávea Engenharia", "519,20", 20],
   ["Virgilio Corrêa", "Virgilio Corrêa", "519,20", 14],
-  ["Construtora e Engenharia Bruno Ferreira", "Bruno Ferreira construtora e engenharia", "519,20", 34],
+  ["Awesome Construtora Bruno Ferreira", "Bruno Ferreira construtora e engenharia", "519,20", 34],
   ["Naves Engenharia", "Naves Engenharia", "519,20", 4],
   ["Vitalle Incorporadora LTDA", "Vitalle Incorporadora LTDA", "519,20", 14],
   ["Amilton Mota Júnior", "Amilton Mota Júnior", "519,20", 44],
@@ -388,7 +384,7 @@ let clients = [
 ];
 
 const STORAGE_KEY_CLIENTS = 'obra_prima_clients_mensal_v1';
-let memoryInteractions = {}; // Cache global na memória para evitar lentidões
+let memoryInteractions = {}; 
 
 let currentSortOrderDias = 'asc';
 let currentSortOrderContato = 'none';
@@ -408,7 +404,6 @@ function loadClients() {
   } catch(e) { console.error("Erro ao carregar clientes", e); }
 }
 
-// ☁️ BUSCA CENTRALIZADA NA NUVEM (FIREBASE)
 function carregarDadosDaNuvem(callback) {
   db.ref('interacoes').once('value').then((snapshot) => {
     memoryInteractions = snapshot.val() || {};
@@ -443,11 +438,21 @@ function calcularMesAnterior(mesStr) {
   return `${ano}-${String(mes).padStart(2, '0')}`;
 }
 
+// 🔮 NOVO GERADOR DE IDENTIFICADOR ÚNICO E IMUTÁVEL BASEADO NO NOME DO CLIENTE
+function generateId(razao) {
+  return 'c_' + razao.toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // Remove acentos
+    .replace(/[^a-z0-9]/g, '_')                      // Substitui espaços e símbolos por "_"
+    .replace(/_+/g, '_')                             // Evita múltiplos "_" seguidos
+    .substring(0, 50);                               // Limita o tamanho máximo da chave
+}
+
 function obterDadosClienteDoCache(clientId, razao, mesKey) {
   const keyNova = `${clientId}_${mesKey}`;
   if (memoryInteractions[keyNova] && (memoryInteractions[keyNova].foiPreenchido || memoryInteractions[keyNova].starter)) {
     return memoryInteractions[keyNova];
   }
+  // Mapeamento retroativo de compatibilidade para evitar perda de dados
   const idAntigoStr = razao.toLowerCase().replace(/[^a-z0-9]/g, '');
   const keyAntiga = `${idAntigoStr}_${mesKey}`;
   if (memoryInteractions[keyAntiga]) {
@@ -456,7 +461,6 @@ function obterDadosClienteDoCache(clientId, razao, mesKey) {
   return null;
 }
 
-// ☁️ SALVAMENTO DIRETO NA NUVEM (FIREBASE)
 function saveData() {
   const mesSelecionado = document.getElementById('mesReferencia').value;
   const updates = {};
@@ -488,16 +492,6 @@ function saveData() {
   db.ref().update(updates).then(() => {
     updateCounter();
   }).catch((e) => console.error("Erro ao salvar no Firebase:", e));
-}
-
-function generateId(razao) {
-  const idx = clients.findIndex(c => c[0] === razao);
-  if (idx !== -1) return `client_${idx}`;
-  return 'c_' + razao.toLowerCase()
-    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-z0-9]/g, '_')
-    .replace(/_+/g, '_')
-    .substring(0, 40);
 }
 
 function buildTable() {
@@ -870,7 +864,6 @@ function escHtml(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-// Inicialização segura puxando primeiro da Nuvem antes de desenhar a tela
 setDefaultMonth();
 loadClients();
 carregarDadosDaNuvem(() => {
