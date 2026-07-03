@@ -48,6 +48,7 @@
   }
   .btn-export  { background: #334155; color: #f8fafc; border: 1px solid #475569; }
   .btn-update  { background: #15803d; color: white; }
+  .btn-cobertura { background: #0284c7; color: white; }
   .btn-migrar  { background: #7e22ce; color: white; font-weight: 600; box-shadow: 0 2px 6px rgba(126,34,206,0.4); }
   .btn:hover { opacity: 0.88; }
 
@@ -178,10 +179,24 @@
     border: 1px solid #334155;
     max-width: 1620px;
   }
-  .update-section h3 { color: #f8fafc; margin-bottom: 8px;}
-  .update-section textarea {
+  .update-section h3 { color: #f8fafc; margin-bottom: 4px;}
+  .panels-grid {
+    display: flex;
+    gap: 20px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+  }
+  .panel-box {
+    flex: 1;
+    min-width: 300px;
+    background: #161e2e;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #334155;
+  }
+  .panel-box textarea {
     width: 100%;
-    height: 60px;
+    height: 70px;
     padding: 10px;
     background: #0f172a;
     color: #f8fafc;
@@ -247,16 +262,26 @@
 
 <div class="update-section">
   <h3>🔄 Painel de Controle de Dados</h3>
-  <p style="color: #cbd5e1; margin-bottom: 10px;">
-    <strong>MIGRAÇÃO AUTOMÁTICA:</strong> Clique no botão roxo abaixo para sincronizar e trazer as datas e marcações que você preencheu no arquivo antigo diretamente para o mês selecionado.
+  <p style="color: #cbd5e1; font-size: 11px;">
+    <strong>MIGRAÇÃO DE CACHE ANTIGO:</strong> Clique no botão roxo abaixo para tentar puxar o histórico que estava salvo no cache local deste navegador para o mês selecionado.
   </p>
-  <div style="display: flex; gap: 10px; margin-bottom: 12px;">
-    <button class="btn btn-migrar" onclick="executarMigracaoDoAnexo()">🔮 Migrar Dados do Arquivo Anexado</button>
+  <button class="btn btn-migrar" style="margin-top:6px; margin-bottom:12px;" onclick="executarMigracaoDoAnexo()">🔮 Migrar Dados Locais para Nuvem</button>
+
+  <div class="panels-grid">
+    <div class="panel-box">
+      <h4 style="color:#f8fafc; margin-bottom:4px;">📋 1. Base Geral de Clientes</h4>
+      <p style="color:#94a3b8; font-size:11px; margin-bottom:6px;">Cole as colunas da Planilha Geral (Razão, Fantasia, MRR, Dias):</p>
+      <textarea id="csvInput" placeholder="Cole aqui os dados gerais..."></textarea>
+      <button class="btn btn-update" onclick="importFromPaste()">📋 Atualizar Estrutura Base</button>
+    </div>
+
+    <div class="panel-box">
+      <h4 style="color:#f8fafc; margin-bottom:4px;">🎯 2. Importar Contatos Efetivos por Cobertura</h4>
+      <p style="color:#94a3b8; font-size:11px; margin-bottom:6px;">Cole as colunas: Razão Social | Nome Fantasia | Tipo de Cobertura</p>
+      <textarea id="coberturaInput" placeholder="Razão Social [Tab] Fantasia [Tab] Cobertura por tarefa..."></textarea>
+      <button class="btn btn-cobertura" onclick="importCoberturasEfetivas()">⚡ Processar Contatos Efetivos</button>
+    </div>
   </div>
-  
-  <p style="color: #94a3b8; margin-bottom: 6px; font-size: 11px;">Área de Atualização manual por Planilha:</p>
-  <textarea id="csvInput" placeholder="Cole os dados das colunas da planilha aqui se quiser substituir a base de clientes no futuro..."></textarea>
-  <button class="btn btn-update" onclick="importFromPaste()">📋 Atualizar Lista por Planilha</button>
 </div>
 
 <script>
@@ -339,7 +364,7 @@ let clients = [
   ["STRAPASON PARTICIPACOES LTDA", "STRAPASON & GASPARIN", "519,20", 11],
   ["C J PROJETOS E ENGENHARIA LTDA", "C J PROJETOS E ENGENHARIA LTDA", "519,20", 13],
   ["ATSUL CONSTRUTORA E INCORPORADORA LTDA", "ATSUL CONSTRUTORA E INCORPORADORA", "459,20", 22],
-  ["Construtora Novva", "Novva Construtora", "519,20", 14],
+  ["CONSTRUTORA NOVVA", "Novva Construtora", "519,20", 14],
   ["Zoco e Zoco Empreendimentos Imobiliarios Ltda", "Zoco e Zoco Empreendimentos Imobiliarios Ltda", "519,20", 14],
   ["V&R PROJETOS LTDA", "V&R PROJETOS LTDA", "519,20", 14],
   ["LV CONSTRUTORA LTDA", "LV ENGENHARIA", "519,20", 7],
@@ -620,9 +645,69 @@ function buildTable() {
     tbody.appendChild(tr);
   });
 
-  // Reaplica a barra de filtro após renderizar/ordenar para não sumir com buscas ativas
   filterTable();
   updateCounter();
+}
+
+// 🔮 NOVA FUNÇÃO INTELIGENTE DE CRUZAMENTO DE COBERTURAS (MUDANÇA AUTOMÁTICA PARA "SIM")
+function importCoberturasEfetivas() {
+  const input = document.getElementById('coberturaInput').value.trim();
+  if (!input) return alert("Por favor, cole a planilha de cobertura primeiro.");
+  
+  const mesSelecionado = document.getElementById('mesReferencia').value;
+  const lines = input.split('\n');
+  const updates = {};
+  let contadosModificados = 0;
+
+  lines.forEach(line => {
+    const tokens = line.includes('\t') ? line.split('\t') : line.split(';');
+    if (tokens.length >= 3) {
+      const razaoPlanilha = tokens[0].trim();
+      const fantasiaPlanilha = tokens[1].trim();
+      const tipoCobertura = tokens[2].trim().toLowerCase();
+
+      // Encontra o cliente correspondente na estrutura ativa
+      const indexCliente = clients.findIndex(c => 
+        c[0].toLowerCase() === razaoPlanilha.toLowerCase() || 
+        c[1].toLowerCase() === fantasiaPlanilha.toLowerCase()
+      );
+
+      if (indexCliente !== -1) {
+        const clienteReal = clients[indexCliente];
+        const clientId = generateId(clienteReal[0]);
+        const storageKeyUnique = `${clientId}_${mesSelecionado}`;
+
+        // Carrega o status atual da memória ou cria um objeto zerado
+        const estadoAtual = memoryInteractions[storageKeyUnique] || {
+          starter: 'starter', hs: '', t1: false, t1d: '', t2: false, t2d: '', t3: false, t3d: '', tl: false, tld: '', canal: ''
+        };
+
+        // Regra de Cobertura solicitada
+        if (tipoCobertura.includes("cobertura por tarefa")) {
+          estadoAtual.contato = 'sim';
+        } else if (tipoCobertura.includes("sem cobertura")) {
+          estadoAtual.contato = 'nao';
+        }
+        
+        estadoAtual.foiPreenchido = true;
+
+        // Guarda no lote de envio do Firebase
+        memoryInteractions[storageKeyUnique] = estadoAtual;
+        updates['/interacoes/' + storageKeyUnique] = estadoAtual;
+        contadosModificados++;
+      }
+    }
+  });
+
+  if (contadosModificados > 0) {
+    db.ref().update(updates).then(() => {
+      buildTable();
+      document.getElementById('coberturaInput').value = '';
+      alert(`⚡ Sucesso! ${contadosModificados} clientes tiveram seus status de contato cruzados e sincronizados na nuvem.`);
+    });
+  } else {
+    alert("Nenhum cliente correspondente foi localizado. Verifique se os nomes das empresas batem com a planilha.");
+  }
 }
 
 function onMonthChange() {
@@ -846,8 +931,14 @@ function onContatoChange(sel) {
 
 function updateCounter() {
   const total = clients.length;
-  const sims = document.querySelectorAll('tr[data-client-id].contato-sim').length;
-  document.getElementById('count-sim').textContent = sims;
+  const sims = document.querySelectorAll('tbody tr').filter(tr => tr.classList.contains('contato-sim')).length;
+  // Fallback seguro de contagem
+  let simsCount = 0;
+  clients.forEach(c => {
+    const d = obterDadosClienteDoCache(generateId(c[0]), c[0], document.getElementById('mesReferencia').value);
+    if(d && d.contato === 'sim') simsCount++;
+  });
+  document.getElementById('count-sim').textContent = simsCount;
   document.getElementById('count-total').textContent = total;
 }
 
