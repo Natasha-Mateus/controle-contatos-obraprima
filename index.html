@@ -270,8 +270,8 @@
   <div class="panels-grid">
     <div class="panel-box">
       <h4 style="color:#f8fafc; margin-bottom:4px;">📋 1. Base Geral de Clientes</h4>
-      <p style="color:#94a3b8; font-size:11px; margin-bottom:6px;">Cole as colunas da Planilha Geral (Razão, Fantasia, MRR, Dias):</p>
-      <textarea id="csvInput" placeholder="Cole aqui os dados gerais..."></textarea>
+      <p style="color:#94a3b8; font-size:11px; margin-bottom:6px;">Cole as colunas (Razão, Fantasia, MRR, Tags/Carteira, Dias Úl. Tarefa):</p>
+      <textarea id="csvInput" placeholder="Razão Social [Tab] Fantasia [Tab] MRR [Tab] Tags Texto Comprido... [Tab] Dias"></textarea>
       <button class="btn btn-update" onclick="importFromPaste()">📋 Atualizar Estrutura Base</button>
     </div>
 
@@ -393,7 +393,7 @@ let clients = [
   ["MM Engenharia e Mineração", "MM Engenharia e Mineração", "519,20", 14],
   ["V Miranda Sousa", "V Miranda Sousa", "519,20", 14],
   ["CGE ENGENHARIA LTDA", "CGE", "519,20", 14],
-  ["PLAY CONSTRUTORA E SERVIÇOS IMOBILIARIOS LTDA", "PLAY CONSTRUTORA E SERVIÇOS IMOBILIARIOS LTDA", "519,20", 14],
+  ["PLAY CONSTRUTORA E SERVIÇOS IMOBILIARIOS LTDA", "PLAY CONSTRUTORA e SERVIÇOS IMOBILIARIOS LTDA", "519,20", 14],
   ["OPEAGA ENGENHARIA INTELIGENTE LTDA", "OPEAGA ENGENHARIA INTELIGENTE LTDA", "519,20", 14],
   ["Ana Carolina Liber Arquitetura", "Ana Carolina Liber Arquitetura", "519,20", 14],
   ["G J F EMPREENDIMENTOS LTDA", "G J F EMPREENDIMENTOS LTDA", "519,20", 14],
@@ -471,12 +471,11 @@ function generateId(razao) {
     .substring(0, 50);
 }
 
-// 🔮 FUNÇÃO AUXILIAR DE LIMPEZA DE TEXTO PARA CRUZAMENTO ULTRA RESILIENTE
 function limparTextoParaComparacao(str) {
   if (!str) return '';
   return str.toLowerCase()
-    .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // Remove acentos
-    .replace(/[^a-z0-9]/g, '');                       // Remove espaços, traços, pontos e vírgulas
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]/g, '');
 }
 
 function obterDadosClienteDoCache(clientId, razao, mesKey) {
@@ -673,7 +672,6 @@ function importCoberturasEfetivas() {
       const fantasiaPlanilha = limparTextoParaComparacao(tokens[1].trim());
       const tipoCobertura = tokens[2].trim().toLowerCase();
 
-      // Busca usando a função de limpeza ultra-resiliente
       const indexCliente = clients.findIndex(c => 
         limparTextoParaComparacao(c[0]) === razaoPlanilha || 
         limparTextoParaComparacao(c[1]) === fantasiaPlanilha ||
@@ -709,10 +707,10 @@ function importCoberturasEfetivas() {
     db.ref().update(updates).then(() => {
       buildTable();
       document.getElementById('coberturaInput').value = '';
-      alert(`⚡ Sucesso! ${contadosModificados} clientes tiveram seus status de contato cruzados e sincronizados na nuvem.`);
+      alert(`⚡ Sucesso! ${contadosModificados} status de contato atualizados e salvos na nuvem.`);
     });
   } else {
-    alert("Nenhum cliente correspondente foi localizado. Verifique se os nomes das empresas batem com a planilha.");
+    alert("Nenhum cliente correspondente foi localizado na lista de coberturas.");
   }
 }
 
@@ -886,29 +884,67 @@ function executarMigracaoDoAnexo() {
   }
 }
 
+// 🔮 PROCESSO DE IMPORTAÇÃO ATUALIZADO (SUPORTANDO A VARREDURA POR PALAVRA-CHAVE EM TAGS)
 function importFromPaste() {
   const input = document.getElementById('csvInput').value.trim();
   if (!input) { return alert("Cole os dados primeiro."); }
+  
+  const mesSelecionado = document.getElementById('mesReferencia').value;
   const lines = input.split('\n');
   const newClients = [];
+  const updates = {};
+
   lines.forEach(line => {
     const tokens = line.includes('\t') ? line.split('\t') : line.split(';');
-    if (tokens.length >= 2) {
+    // Exige a estrutura de 5 colunas definida: Razão, Fantasia, MRR, Tags, Dias
+    if (tokens.length >= 5) {
       const razao = tokens[0].trim();
       const fantasia = tokens[1].trim();
-      const mrr = tokens[2] ? tokens[2].trim() : '0,00';
-      const dias = tokens[3] ? parseInt(tokens[3].trim().replace(/[^0-9]/g, '')) || 0 : 0;
-      if (razao) newClients.push([razao, fantasia, mrr, dias]);
+      const mrr = tokens[2].trim();
+      const tagsCélula = tokens[3].trim().toLowerCase(); // Pega a célula cheia de informações e passa para minúsculo
+      const dias = parseInt(tokens[4].trim().replace(/[^0-9]/g, '')) || 0;
+
+      if (razao) {
+        newClients.push([razao, fantasia, mrr, dias]);
+
+        // Executa a lógica inteligente de varredura na célula de tags
+        let carteiraIdentificada = 'starter'; // Default de segurança
+        if (tagsCélula.includes('basic')) {
+          carteiraIdentificada = 'basic';
+        } else if (tagsCélula.includes('starter')) {
+          carteiraIdentificada = 'starter';
+        }
+
+        const clientId = generateId(razao);
+        const storageKeyUnique = `${clientId}_${mesSelecionado}`;
+
+        // Obtém o registro existente deste mês ou monta a base estrutural dele
+        const estadoExistente = memoryInteractions[storageKeyUnique] || {
+          hs: '', t1: false, t1d: '', t2: false, t2d: '', t3: false, t3d: '', tl: false, tld: '', canal: '', contato: 'nao'
+        };
+
+        // Aplica a nova carteira escaneada por palavra-chave
+        estadoExistente.starter = carteiraIdentificada;
+        estadoExistente.foiPreenchido = true;
+
+        memoryInteractions[storageKeyUnique] = estadoExistente;
+        updates['/interacoes/' + storageKeyUnique] = estadoExistente;
+      }
     }
   });
+
   if (newClients.length > 0) {
     clients = newClients;
     localStorage.setItem(STORAGE_KEY_CLIENTS, JSON.stringify(clients));
-    buildTable();
-    document.getElementById('csvInput').value = '';
-    alert("Lista de clientes atualizada com sucesso!");
+    
+    // Atualiza no banco as carteiras escaneadas antes de redesenhar a tabela
+    db.ref().update(updates).then(() => {
+      buildTable();
+      document.getElementById('csvInput').value = '';
+      alert("Lista de clientes importada! A estrutura base e os dados de carteira (Starter/Basic) foram atualizados com sucesso.");
+    });
   } else {
-    alert("Nenhum dado válido pôde ser importado.");
+    alert("Nenhum dado válido pôde ser importado. Certifique-se de copiar as 5 colunas da planilha.");
   }
 }
 
