@@ -649,7 +649,6 @@ function buildTable() {
   updateCounter();
 }
 
-// 🔮 NOVA FUNÇÃO INTELIGENTE DE CRUZAMENTO DE COBERTURAS (MUDANÇA AUTOMÁTICA PARA "SIM")
 function importCoberturasEfetivas() {
   const input = document.getElementById('coberturaInput').value.trim();
   if (!input) return alert("Por favor, cole a planilha de cobertura primeiro.");
@@ -666,7 +665,6 @@ function importCoberturasEfetivas() {
       const fantasiaPlanilha = tokens[1].trim();
       const tipoCobertura = tokens[2].trim().toLowerCase();
 
-      // Encontra o cliente correspondente na estrutura ativa
       const indexCliente = clients.findIndex(c => 
         c[0].toLowerCase() === razaoPlanilha.toLowerCase() || 
         c[1].toLowerCase() === fantasiaPlanilha.toLowerCase()
@@ -677,12 +675,10 @@ function importCoberturasEfetivas() {
         const clientId = generateId(clienteReal[0]);
         const storageKeyUnique = `${clientId}_${mesSelecionado}`;
 
-        // Carrega o status atual da memória ou cria um objeto zerado
         const estadoAtual = memoryInteractions[storageKeyUnique] || {
           starter: 'starter', hs: '', t1: false, t1d: '', t2: false, t2d: '', t3: false, t3d: '', tl: false, tld: '', canal: ''
         };
 
-        // Regra de Cobertura solicitada
         if (tipoCobertura.includes("cobertura por tarefa")) {
           estadoAtual.contato = 'sim';
         } else if (tipoCobertura.includes("sem cobertura")) {
@@ -691,7 +687,6 @@ function importCoberturasEfetivas() {
         
         estadoAtual.foiPreenchido = true;
 
-        // Guarda no lote de envio do Firebase
         memoryInteractions[storageKeyUnique] = estadoAtual;
         updates['/interacoes/' + storageKeyUnique] = estadoAtual;
         contadosModificados++;
@@ -900,7 +895,7 @@ function importFromPaste() {
     localStorage.setItem(STORAGE_KEY_CLIENTS, JSON.stringify(clients));
     buildTable();
     document.getElementById('csvInput').value = '';
-    alert("Lista de clientes atualizada com sucesso!");
+    alert("Lista de clientes updated com sucesso!");
   } else {
     alert("Nenhum dado válido pôde ser importado.");
   }
@@ -931,13 +926,17 @@ function onContatoChange(sel) {
 
 function updateCounter() {
   const total = clients.length;
-  const sims = document.querySelectorAll('tbody tr').filter(tr => tr.classList.contains('contato-sim')).length;
-  // Fallback seguro de contagem
+  const mesSelecionado = document.getElementById('mesReferencia').value;
+  
   let simsCount = 0;
   clients.forEach(c => {
-    const d = obterDadosClienteDoCache(generateId(c[0]), c[0], document.getElementById('mesReferencia').value);
-    if(d && d.contato === 'sim') simsCount++;
+    const clientId = generateId(c[0]);
+    const d = obterDadosClienteDoCache(clientId, c[0], mesSelecionado);
+    if (d && d.contato === 'sim') {
+      simsCount++;
+    }
   });
+  
   document.getElementById('count-sim').textContent = simsCount;
   document.getElementById('count-total').textContent = total;
 }
