@@ -64,7 +64,7 @@
   table {
     border-collapse: collapse;
     background: #1e293b;
-    width: 1690px;
+    width: 1790px; /* Largura levemente aumentada para acomodar a nova coluna */
   }
   thead tr {
     background: #0f172a;
@@ -135,7 +135,6 @@
     outline: none;
   }
 
-  /* Estilos Dinâmicos das Células Bloqueadas de HS */
   .hs-cell-block {
     width: 65px;
     padding: 5px;
@@ -150,7 +149,6 @@
   .hs-saudavel { background: #064e3b !important; color: #4ade80 !important; border: 1px solid #059669; }
   .hs-vazio { background: #0f172a; color: #cbd5e1; border: 1px solid #334155; }
 
-  /* Estilos Dinâmicos das Células Bloqueadas de Evolução */
   .evo-cell-block {
     width: 85px;
     padding: 5px;
@@ -178,6 +176,14 @@
   select.custom-sel.basic { background: #0d9488; color: white; font-weight: 600; }
   select.custom-sel.nao { background: #b91c1c; color: white; font-weight: 600; }
   select.custom-sel.sim { background: #16a34a; color: white; font-weight: 600; }
+
+  /* Estilo neutro/padrão do sistema para o select da reunião */
+  select.custom-sel.reuniao-sel {
+    background: #1e293b;
+    color: #f8fafc;
+    font-weight: 500;
+    max-width: 80px;
+  }
 
   td.razao { width: 240px; max-width: 240px; font-size: 11px; white-space: normal; word-break: break-word; }
   td.fantasia { width: 200px; max-width: 200px; font-size: 11px; white-space: normal; word-break: break-word; }
@@ -272,6 +278,7 @@
         <th class="sortable" style="width:125px" id="th-tl" onclick="toggleSortDataTentativa('tl', 'th-tl', 'Ligação')">Ligação ↕</th>
         <th style="width:180px">Canal de Contato</th>
         <th class="sortable" style="width:100px" id="th-contato" onclick="toggleSortContato()">Contato Efetivo? ↕</th>
+        <th style="width:100px">Reunião Realizada?</th>
       </tr>
     </thead>
     <tbody id="tableBody">
@@ -530,7 +537,6 @@ function saveData() {
     const clientId = row.dataset.clientId;
     const storageKeyUnique = `${clientId}_${mesSelecionado}`;
 
-    // Captura os valores de texto que estão renderizados nos blocos bloqueados
     const hsVal = row.querySelector('.hs-cell-value').textContent;
     const evoVal = row.querySelector('.evo-cell-value').textContent;
 
@@ -548,6 +554,7 @@ function saveData() {
       tld: row.querySelector('.tl-date').value,
       canal: row.querySelector('.canal-textarea').value,
       contato: row.querySelector('.contato-sel').value,
+      reuniao: row.querySelector('.reuniao-sel').value, // Salva o novo campo na nuvem
       foiPreenchido: true
     };
 
@@ -572,12 +579,10 @@ function buildTable() {
     const s = obterDadosClienteDoCache(clientId, razao, mesSelecionado) || {};
     
     let starter = s.starter;
-    
-    // 🔥 REMOÇÃO TOTAL DA HERANÇA DE HS E EVOLUÇÃO ENTRE OS MESES
-    // Se o mês for novo (não preenchido), eles vêm totalmente limpos esperando a importação do painel 3
     let hsValor = s.foiPreenchido ? s.hs : '';
     let evolucaoValor = s.foiPreenchido ? (s.evolucao || '') : '';
     let contato = s.contato;
+    let reuniaoValor = s.reuniao || 'nao'; // Puxa o valor da reunião ou assume 'nao' por padrão
 
     if (!s.foiPreenchido) {
       let mesVarredura = calcularMesAnterior(mesSelecionado);
@@ -606,12 +611,12 @@ function buildTable() {
         starter = 'starter';
       }
       contato = 'nao';
+      reuniaoValor = 'nao';
     } else {
       starter = starter || 'starter';
       contato = contato || 'nao';
     }
 
-    // 🎨 CLASSIFICAÇÃO DE CORES DINÂMICAS DO QUADRADO DO HS
     let hsClass = "hs-vazio";
     if (hsValor !== "" && !isNaN(hsValor)) {
       const numHS = parseFloat(hsValor);
@@ -620,7 +625,6 @@ function buildTable() {
       else if (numHS >= 30 && numHS <= 100) hsClass = "hs-saudavel";
     }
 
-    // 🎨 CLASSIFICAÇÃO DE CORES DINÂMICAS DO QUADRADO DE EVOLUÇÃO
     let evoClass = "evo-manteve";
     const evoLimpa = evolucaoValor.trim().toLowerCase();
     if (evoLimpa === "piorou") evoClass = "evo-piorou";
@@ -652,17 +656,12 @@ function buildTable() {
       <td class="left razao">${escHtml(razao)}</td>
       <td class="left fantasia">${escHtml(fantasia)}</td>
       <td>R$ ${escHtml(mrr || '0,00')}</td>
-      
-      <!-- Célula de HS Bloqueada com Cor Dinâmica -->
       <td>
         <span class="hs-cell-block ${hsClass} hs-cell-value">${escHtml(hsValor)}</span>
       </td>
-
-      <!-- Nova Célula de Evolução Bloqueada com Cor Dinâmica -->
       <td>
         <span class="evo-cell-block ${evoClass} evo-cell-value">${escHtml(evolucaoValor || 'Manteve')}</span>
       </td>
-
       <td style="font-weight: 600;">${valDias}</td>
       <td>
         <select class="custom-sel starter-sel ${starter}" onchange="onStarterChange(this)">
@@ -704,6 +703,13 @@ function buildTable() {
           <option value="sim" ${contato === 'sim' ? 'selected' : ''}>Sim</option>
         </select>
       </td>
+      <!-- Nova Coluna Neutra: Reunião Realizada? -->
+      <td>
+        <select class="custom-sel reuniao-sel" onchange="saveData()">
+          <option value="nao" ${reuniaoValor === 'nao' ? 'selected' : ''}>Não</option>
+          <option value="sim" ${reuniaoValor === 'sim' ? 'selected' : ''}>Sim</option>
+        </select>
+      </td>
     `;
 
     tbody.appendChild(tr);
@@ -741,10 +747,10 @@ function importCoberturasEfetivas() {
         const clientId = generateId(clienteReal[0]);
         const storageKeyUnique = `${clientId}_${mesSelecionado}`;
 
-        // Obtém o HS e Evolução que já estão renderizados na tela para não perdê-los no update
         const trVigente = document.querySelector(`tr[data-client-id="${clientId}"]`);
         const hsValorVigente = trVigente ? trVigente.querySelector('.hs-cell-value').textContent : '';
         const evoValorVigente = trVigente ? trVigente.querySelector('.evo-cell-value').textContent : '';
+        const reuniaoValorVigente = trVigente ? trVigente.querySelector('.reuniao-sel').value : 'nao';
 
         const estadoAtual = memoryInteractions[storageKeyUnique] || {
           starter: 'starter', t1: false, t1d: '', t2: false, t2d: '', t3: false, t3d: '', tl: false, tld: '', canal: ''
@@ -752,6 +758,7 @@ function importCoberturasEfetivas() {
 
         estadoAtual.hs = hsValorVigente;
         estadoAtual.evolucao = evoValorVigente;
+        estadoAtual.reuniao = reuniaoValorVigente;
 
         if (tipoCobertura.includes("cobertura por tarefa")) {
           estadoAtual.contato = 'sim';
@@ -779,7 +786,6 @@ function importCoberturasEfetivas() {
   }
 }
 
-// 🔮 NOVO PROCESSADOR DO PAINEL 3 (CRUZAMENTO DE SAÚDE E EVOLUÇÃO DO HS COM PROCURA EM RAZÃO E FANTASIA)
 function importSaudeEvolucao() {
   const input = document.getElementById('saudeInput').value.trim();
   if (!input) return alert("Por favor, cole os dados de saúde primeiro.");
@@ -793,15 +799,13 @@ function importSaudeEvolucao() {
     const tokens = line.includes('\t') ? line.split('\t') : line.split(';');
     if (tokens.length >= 3) {
       const nomePlanilhaLimpo = limparTextoParaComparacao(tokens[0].trim());
-      const valorHS = tokens[1].trim().replace(/[^0-9\-]/g, ''); // Garante que mantém o sinal de negativo se houver
+      const valorHS = tokens[1].trim().replace(/[^0-9\-]/g, ''); 
       let evoTexto = tokens[2].trim().toLowerCase();
 
-      // Mapeamento resiliente do texto de evolução
       if (evoTexto.includes("piorou")) evoTexto = "Piorou";
       else if (evoTexto.includes("melhorou")) evoTexto = "Melhorou";
       else evoTexto = "Manteve";
 
-      // Procura inteligente combinada na Razão Social ou no Nome Fantasia
       const indexCliente = clients.findIndex(c => 
         limparTextoParaComparacao(c[0]) === nomePlanilhaLimpo || 
         limparTextoParaComparacao(c[1]) === nomePlanilhaLimpo ||
@@ -814,14 +818,16 @@ function importSaudeEvolucao() {
         const clientId = generateId(clienteReal[0]);
         const storageKeyUnique = `${clientId}_${mesSelecionado}`;
 
-        // Mantém as interações do mês (checkboxes, canais, etc.) sem resetá-las
+        const trVigente = document.querySelector(`tr[data-client-id="${clientId}"]`);
+        const reuniaoValorVigente = trVigente ? trVigente.querySelector('.reuniao-sel').value : 'nao';
+
         const estadoAtual = memoryInteractions[storageKeyUnique] || {
           starter: 'starter', t1: false, t1d: '', t2: false, t2d: '', t3: false, t3d: '', tl: false, tld: '', canal: '', contato: 'nao'
         };
 
-        // Aplica os novos dados numéricos e comportamentais
         estadoAtual.hs = valorHS;
         estadoAtual.evolucao = evoTexto;
+        estadoAtual.reuniao = reuniaoValorVigente;
         estadoAtual.foiPreenchido = true;
 
         memoryInteractions[storageKeyUnique] = estadoAtual;
@@ -993,6 +999,10 @@ function toggleSortContato() {
   buildTable();
 }
 
+function executingMigracaoDoAnexo() { // Mantendo retrocompatibilidade de nomenclatura
+  executarMigracaoDoAnexo();
+}
+
 function executarMigracaoDoAnexo() {
   try {
     const rawAnexo = localStorage.getItem('obra_prima_interactions_v4') || localStorage.getItem('obra_prima_interactions_mensal_v1');
@@ -1018,6 +1028,7 @@ function executarMigracaoDoAnexo() {
         starter: cart,
         hs: '',
         evolucao: '',
+        reuniao: 'nao',
         t1: false, t1d: '',
         t2: false, t2d: '',
         t3: false, t3d: '',
@@ -1072,7 +1083,7 @@ function importFromPaste() {
         const storageKeyUnique = `${clientId}_${mesSelecionado}`;
 
         const estadoExistente = memoryInteractions[storageKeyUnique] || {
-          hs: '', evolucao: '', t1: false, t1d: '', t2: false, t2d: '', t3: false, t3d: '', tl: false, tld: '', canal: '', contato: 'nao'
+          hs: '', evolucao: '', reuniao: 'nao', t1: false, t1d: '', t2: false, t2d: '', t3: false, t3d: '', tl: false, tld: '', canal: '', contato: 'nao'
         };
 
         estadoExistente.starter = carteiraIdentificada;
