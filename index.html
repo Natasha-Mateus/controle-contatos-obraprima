@@ -3,321 +3,434 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Controle de Tentativas de Contato - Mensal Definitivo (Dark)</title>
+<title>Obra Prima — Controle de Carteira</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
     font-family: 'Segoe UI', Arial, sans-serif;
     font-size: 12px;
-    background: #0f172a; 
-    color: #e2e8f0; 
-    padding: 20px;
+    background: #0f172a;
+    color: #e2e8f0;
   }
-  h1 {
-    font-size: 16px;
-    color: #f8fafc;
-    margin-bottom: 16px;
-    font-weight: 600;
-  }
-  .toolbar {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 14px;
-    align-items: center;
-    flex-wrap: wrap;
-    max-width: 1620px;
-  }
-  .toolbar input[type="text"], .toolbar input[type="month"] {
-    padding: 6px 10px;
-    border: 1px solid #334155;
-    background: #1e293b;
-    color: #f8fafc;
-    border-radius: 6px;
-    font-size: 12px;
-  }
-  .toolbar input[type="text"] { width: 240px; }
-  .toolbar input[type="month"] { width: 160px; font-weight: 600; border-color: #3b82f6; }
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-thumb { background: #334155; border-radius: 6px; }
 
-  .btn {
-    padding: 6px 14px;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 12px;
-    font-weight: 500;
+  /* ===== LOGIN ===== */
+  #loginScreen {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(circle at 20% 20%, #1e293b 0%, #0f172a 60%);
   }
+  .login-box {
+    background: #161e2e;
+    border: 1px solid #334155;
+    border-radius: 12px;
+    padding: 32px 30px;
+    width: 320px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+  }
+  .login-box h2 { color: #f8fafc; font-size: 16px; margin-bottom: 4px; }
+  .login-box p { color: #94a3b8; font-size: 11px; margin-bottom: 18px; }
+  .login-box label { display:block; color:#94a3b8; font-size:11px; margin-bottom:4px; margin-top:12px; }
+  .login-box input {
+    width: 100%; padding: 8px 10px; border-radius: 6px;
+    border: 1px solid #334155; background: #0f172a; color: #f8fafc; font-size: 12px;
+  }
+  .login-box input:focus { outline: none; border-color: #f2b705; }
+  .login-box button {
+    margin-top: 18px; width: 100%; padding: 10px; border: none; border-radius: 6px;
+    background: #f2b705; color: #1a1300; font-weight: 700; cursor: pointer; font-size: 12.5px;
+  }
+  .login-box button:hover { opacity: 0.9; }
+  .login-error { color: #f87171; font-size: 11px; margin-top: 10px; min-height: 14px; }
+
+  /* ===== APP SHELL ===== */
+  #appShell { display: none; min-height: 100vh; }
+  .app-shell-inner { display: flex; min-height: 100vh; }
+
+  .sidebar {
+    width: 220px;
+    flex-shrink: 0;
+    background: #10182b;
+    border-right: 1px solid #1e293b;
+    display: flex;
+    flex-direction: column;
+    padding: 18px 12px;
+  }
+  .brand { color: #f8fafc; font-size: 14px; font-weight: 700; padding: 6px 10px 18px 10px; border-bottom: 1px solid #1e293b; margin-bottom: 14px; }
+  .brand small { display:block; color:#64748b; font-weight:400; font-size:10.5px; margin-top:2px; }
+  .nav-group-label { color:#475569; font-size:10px; text-transform:uppercase; letter-spacing:0.06em; padding: 10px 10px 4px; }
+  .nav-item {
+    display: block; width: 100%; text-align: left;
+    background: transparent; border: none; color: #cbd5e1;
+    padding: 9px 10px; border-radius: 7px; font-size: 12px; cursor: pointer;
+    margin-bottom: 2px;
+  }
+  .nav-item:hover { background: #1a2438; color: #f8fafc; }
+  .nav-item.active { background: rgba(242,183,5,0.12); color: #f2b705; font-weight: 600; }
+  .sidebar-footer { margin-top: auto; border-top: 1px solid #1e293b; padding-top: 12px; }
+  .sidebar-footer .user-line { color:#94a3b8; font-size:11px; padding: 4px 10px 8px; word-break: break-all; }
+  .btn-logout { width:100%; padding:7px; background:#1e293b; color:#cbd5e1; border:1px solid #334155; border-radius:6px; cursor:pointer; font-size:11px; }
+  .btn-logout:hover { background:#334155; }
+
+  .main-content { flex: 1; min-width: 0; padding: 20px 24px; }
+
+  .top-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 18px; flex-wrap: wrap; gap: 10px;
+  }
+  .top-header h1 { font-size: 17px; color: #f8fafc; font-weight: 700; }
+  .top-header-controls { display: flex; align-items: center; gap: 8px; }
+  .top-header-controls label { color: #94a3b8; font-weight: 600; }
+  .top-header-controls input[type="month"] {
+    padding: 6px 10px; border: 1px solid #f2b705; background: #1e293b; color: #f8fafc;
+    border-radius: 6px; font-size: 12px; font-weight: 600;
+  }
+
+  .view-panel { display: none; }
+  .view-panel.active { display: block; }
+
+  /* ===== KPI / DASHBOARD ===== */
+  .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 18px; }
+  .kpi-card { background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 14px 16px; }
+  .kpi-card .kpi-label { color: #94a3b8; font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 6px; }
+  .kpi-card .kpi-value { color: #f8fafc; font-size: 21px; font-weight: 700; }
+  .kpi-card .kpi-sub { color: #64748b; font-size: 10.5px; margin-top: 4px; }
+
+  .chart-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 14px; margin-bottom: 18px; }
+  .chart-card { background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 14px 16px; }
+  .chart-card h3 { color: #f8fafc; font-size: 12.5px; margin-bottom: 10px; }
+  .chart-card canvas { max-height: 220px; }
+
+  .meta-box { display:flex; align-items:center; gap:8px; margin-bottom: 16px; background:#161e2e; border:1px solid #334155; border-radius:8px; padding:10px 14px; width: fit-content; }
+  .meta-box label { color:#94a3b8; font-size:11.5px; }
+  .meta-box input { width: 70px; padding: 5px 8px; border-radius: 5px; border: 1px solid #334155; background:#0f172a; color:#f8fafc; }
+  .meta-box button { padding: 6px 12px; border:none; border-radius:5px; background:#f2b705; color:#1a1300; font-weight:700; cursor:pointer; }
+
+  /* ===== FILTERS / TOOLBAR ===== */
+  .toolbar { display: flex; gap: 10px; margin-bottom: 14px; align-items: center; flex-wrap: wrap; }
+  .toolbar input[type="text"] { padding: 6px 10px; border: 1px solid #334155; background: #1e293b; color: #f8fafc; border-radius: 6px; font-size: 12px; width: 220px; }
+  .toolbar select.filter-sel { padding: 6px 10px; border: 1px solid #334155; background: #1e293b; color: #f8fafc; border-radius: 6px; font-size: 12px; }
+
+  .btn { padding: 6px 14px; border: none; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 500; }
   .btn-export  { background: #334155; color: #f8fafc; border: 1px solid #475569; }
   .btn-update  { background: #15803d; color: white; }
   .btn-cobertura { background: #0284c7; color: white; }
   .btn-saude { background: #eab308; color: #0f172a; font-weight: 600; }
-  .btn-migrar  { background: #7e22ce; color: white; font-weight: 600; box-shadow: 0 2px 6px rgba(126,34,206,0.4); }
+  .btn-migrar  { background: #7e22ce; color: white; font-weight: 600; }
   .btn:hover { opacity: 0.88; }
 
-  .table-wrapper {
-    overflow-x: auto;
-    border-radius: 10px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
-    width: max-content;
-    max-width: 100%;
-    border: 1px solid #334155;
-  }
-  table {
-    border-collapse: collapse;
-    background: #1e293b;
-    width: 1790px; /* Largura levemente aumentada para acomodar a nova coluna */
-  }
-  thead tr {
-    background: #0f172a;
-    color: #f8fafc;
-  }
-  th {
-    padding: 10px 8px;
-    text-align: center;
-    font-weight: 600;
-    font-size: 11.5px;
-    white-space: nowrap;
-    border: 1px solid #334155;
-  }
+  .table-wrapper { overflow-x: auto; border-radius: 10px; box-shadow: 0 4px 20px rgba(0,0,0,0.4); width: max-content; max-width: 100%; border: 1px solid #334155; }
+  table { border-collapse: collapse; background: #1e293b; }
+  thead tr { background: #0f172a; color: #f8fafc; }
+  th { padding: 10px 8px; text-align: center; font-weight: 600; font-size: 11.5px; white-space: nowrap; border: 1px solid #334155; }
   th.left { text-align: left; padding-left: 12px; }
-  th.sortable { cursor: pointer; background: #0f172a; user-select: none; color: #3b82f6; }
+  th.sortable { cursor: pointer; background: #0f172a; user-select: none; color: #f2b705; }
   th.sortable:hover { background: #1e293b; }
 
-  td {
-    padding: 6px 8px;
-    border: 1px solid #334155;
-    vertical-align: middle;
-    text-align: center;
-    color: #cbd5e1;
-  }
+  td { padding: 6px 8px; border: 1px solid #334155; vertical-align: middle; text-align: center; color: #cbd5e1; }
   td.left { text-align: left; padding-left: 12px; }
 
   tr:nth-child(even) td { background: #1e293b; }
   tr:nth-child(odd)  td { background: #161e2e; }
-
   tr.contato-sim td { background: #052e16 !important; color: #4ade80 !important; }
   tr.starter-nao td { background: #451a03 !important; color: #f87171 !important; }
 
-  .check-group {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 3px;
-  }
-  .check-group input[type="checkbox"] {
-    width: 16px; height: 16px; cursor: pointer; accent-color: #3b82f6;
-  }
-  .check-group input[type="date"] {
-    font-size: 10.5px;
-    background: #0f172a;
-    color: #f8fafc;
-    border: 1px solid #334155;
-    border-radius: 4px;
-    padding: 2px 4px;
-    width: 110px;
-  }
+  .check-group { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+  .check-group input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; accent-color: #f2b705; }
+  .check-group input[type="date"] { font-size: 10.5px; background: #0f172a; color: #f8fafc; border: 1px solid #334155; border-radius: 4px; padding: 2px 4px; width: 110px; }
 
   textarea.custom-textarea-input {
-    width: 100%;
-    height: 48px;
-    padding: 4px 6px;
-    font-family: 'Segoe UI', Arial, sans-serif;
-    font-size: 11px;
-    background: #0f172a;
-    color: #f8fafc;
-    border: 1px solid #334155;
-    border-radius: 5px;
-    resize: vertical;
-    text-align: left;
-    display: block;
+    width: 100%; height: 48px; padding: 4px 6px; font-family: 'Segoe UI', Arial, sans-serif; font-size: 11px;
+    background: #0f172a; color: #f8fafc; border: 1px solid #334155; border-radius: 5px; resize: vertical; text-align: left; display: block;
   }
-  textarea.custom-textarea-input:focus {
-    border-color: #3b82f6;
-    outline: none;
-  }
+  textarea.custom-textarea-input:focus { border-color: #f2b705; outline: none; }
 
-  .hs-cell-block {
-    width: 65px;
-    padding: 5px;
-    font-size: 11.5px;
-    font-weight: bold;
-    border-radius: 5px;
-    text-align: center;
-    display: inline-block;
-  }
+  .hs-cell-block { width: 65px; padding: 5px; font-size: 11.5px; font-weight: bold; border-radius: 5px; text-align: center; display: inline-block; }
   .hs-critico { background: #7f1d1d !important; color: #f87171 !important; border: 1px solid #b91c1c; }
   .hs-alerta  { background: #78350f !important; color: #fbbf24 !important; border: 1px solid #d97706; }
   .hs-saudavel { background: #064e3b !important; color: #4ade80 !important; border: 1px solid #059669; }
   .hs-vazio { background: #0f172a; color: #cbd5e1; border: 1px solid #334155; }
 
-  .evo-cell-block {
-    width: 85px;
-    padding: 5px;
-    font-size: 11px;
-    font-weight: 600;
-    border-radius: 5px;
-    text-align: center;
-    display: inline-block;
-    text-transform: capitalize;
-  }
+  .evo-cell-block { width: 95px; padding: 5px; font-size: 11px; font-weight: 600; border-radius: 5px; text-align: center; display: inline-block; text-transform: capitalize; }
   .evo-piorou { background: #7f1d1d !important; color: #f87171 !important; border: 1px solid #b91c1c; }
   .evo-melhorou { background: #064e3b !important; color: #4ade80 !important; border: 1px solid #059669; }
   .evo-manteve { background: transparent; color: #cbd5e1; border: 1px solid #334155; }
+  .evo-naorespondido { background: #1e1b0f !important; color: #f87171 !important; border: 1px solid #78350f; }
 
-  select.custom-sel {
-    font-size: 11.5px;
-    padding: 3px 6px;
-    border-radius: 5px;
-    border: 1px solid #334155;
-    cursor: pointer;
-    width: 100%;
-    max-width: 85px;
-  }
+  select.custom-sel { font-size: 11.5px; padding: 3px 6px; border-radius: 5px; border: 1px solid #334155; cursor: pointer; width: 100%; max-width: 90px; }
   select.custom-sel.starter { background: #2563eb; color: white; font-weight: 600; }
   select.custom-sel.basic { background: #0d9488; color: white; font-weight: 600; }
   select.custom-sel.nao { background: #b91c1c; color: white; font-weight: 600; }
   select.custom-sel.sim { background: #16a34a; color: white; font-weight: 600; }
+  select.custom-sel.reuniao-sel { background: #1e293b; color: #f8fafc; font-weight: 500; max-width: 80px; }
+  select.custom-sel.canal-sel { background: #1e293b; color: #f8fafc; font-weight: 500; max-width: 105px; }
 
-  /* Estilo neutro/padrão do sistema para o select da reunião */
-  select.custom-sel.reuniao-sel {
-    background: #1e293b;
-    color: #f8fafc;
-    font-weight: 500;
-    max-width: 80px;
-  }
+  td.razao { width: 220px; max-width: 220px; font-size: 11px; white-space: normal; word-break: break-word; }
+  td.fantasia { width: 180px; max-width: 180px; font-size: 11px; white-space: normal; word-break: break-word; }
 
-  td.razao { width: 240px; max-width: 240px; font-size: 11px; white-space: normal; word-break: break-word; }
-  td.fantasia { width: 200px; max-width: 200px; font-size: 11px; white-space: normal; word-break: break-word; }
-
-  .counter {
-    font-size: 11px;
-    color: #94a3b8;
-    margin-left: auto;
-  }
+  .counter { font-size: 11px; color: #94a3b8; margin-left: auto; }
   .counter span { font-weight: 700; color: #4ade80; }
 
-  .print-note { margin-top: 10px; font-size: 11px; color: #64748b; }
-  
-  .update-section {
-    margin-top: 20px;
-    background: #1e293b;
-    padding: 15px;
-    border-radius: 10px;
-    border: 1px solid #334155;
-    max-width: 1620px;
+  .pagination-bar { display: flex; align-items: center; justify-content: space-between; margin-top: 12px; flex-wrap: wrap; gap: 10px; }
+  .pagination-bar .info { color: #94a3b8; font-size: 11px; }
+  .pagination-bar .pages { display: flex; gap: 4px; align-items: center; }
+  .pagination-bar button.page-btn {
+    padding: 5px 10px; border-radius: 5px; border: 1px solid #334155; background: #1e293b; color: #cbd5e1; cursor: pointer; font-size: 11.5px;
   }
-  .update-section h3 { color: #f8fafc; margin-bottom: 4px;}
-  .panels-grid {
-    display: flex;
-    gap: 15px;
-    margin-top: 10px;
-    flex-wrap: wrap;
-  }
-  .panel-box {
-    flex: 1;
-    min-width: 300px;
-    background: #161e2e;
-    padding: 12px;
-    border-radius: 8px;
-    border: 1px solid #334155;
-  }
+  .pagination-bar button.page-btn.current { background: #f2b705; color: #1a1300; font-weight: 700; border-color: #f2b705; }
+  .pagination-bar button.page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .pagination-bar select { padding: 4px 6px; border-radius: 5px; border: 1px solid #334155; background: #1e293b; color: #cbd5e1; }
+
+  .update-section { margin-top: 4px; background: #1e293b; padding: 15px; border-radius: 10px; border: 1px solid #334155; }
+  .update-section h3 { color: #f8fafc; margin-bottom: 4px; }
+  .panels-grid { display: flex; gap: 15px; margin-top: 10px; flex-wrap: wrap; }
+  .panel-box { flex: 1; min-width: 280px; background: #161e2e; padding: 12px; border-radius: 8px; border: 1px solid #334155; }
   .panel-box textarea {
-    width: 100%;
-    height: 70px;
-    padding: 10px;
-    background: #0f172a;
-    color: #f8fafc;
-    border: 1px solid #334155;
-    border-radius: 6px;
-    font-family: monospace;
-    font-size: 11px;
-    margin-bottom: 8px;
-    resize: vertical;
+    width: 100%; height: 70px; padding: 10px; background: #0f172a; color: #f8fafc; border: 1px solid #334155;
+    border-radius: 6px; font-family: monospace; font-size: 11px; margin-bottom: 8px; resize: vertical;
   }
 
+  .simple-table-wrap { overflow-x: auto; border-radius: 10px; border: 1px solid #334155; }
+  .simple-table { width: 100%; border-collapse: collapse; background: #1e293b; }
+  .simple-table th { background: #0f172a; color: #f8fafc; padding: 9px 10px; font-size: 11.5px; text-align: left; border: 1px solid #334155; }
+  .simple-table td { padding: 8px 10px; border: 1px solid #334155; font-size: 11.5px; color: #cbd5e1; }
+  .simple-table tr:nth-child(even) td { background: #1a2338; }
+
+  .canal-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px,1fr)); gap: 12px; margin-bottom: 18px; }
+
+  .print-note { margin-top: 10px; font-size: 11px; color: #64748b; }
+
   @media print {
-    body { background: white; color: black; padding: 0; }
-    .toolbar, .update-section { display: none; }
+    body { background: white; color: black; }
+    .sidebar, .top-header-controls, .toolbar, .update-section, .pagination-bar { display: none; }
     .table-wrapper { box-shadow: none; border: none; width: 100%; }
     table { width: 100%; }
-    textarea.custom-textarea-input { border: none; height: auto; background: transparent; color: black; }
+  }
+
+  @media (max-width: 900px) {
+    .app-shell-inner { flex-direction: column; }
+    .sidebar { width: 100%; flex-direction: row; overflow-x: auto; }
+    .nav-group-label { display:none; }
   }
 </style>
 
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
 </head>
 <body>
 
-<h1>📋 Controle de Tentativas de Contato — Obra Prima</h1>
-
-<div class="toolbar">
-  <input type="text" id="search" placeholder="🔍 Filtrar por razão social ou fantasia..." oninput="filterTable()">
-  
-  <label style="font-weight: 600; margin-left: 10px; color: #94a3b8;">Mês de Referência:</label>
-  <input type="month" id="mesReferencia" onchange="onMonthChange()">
-
-  <button class="btn btn-export" onclick="window.print()">🖨️ Imprimir / Exportar PDF</button>
-  <div class="counter">Contatos efetivos no mês: <span id="count-sim">0</span> / <span id="count-total">0</span></div>
+<!-- ===== TELA DE LOGIN ===== -->
+<div id="loginScreen">
+  <div class="login-box">
+    <h2>Obra Prima</h2>
+    <p>Controle de Carteira — acesso restrito</p>
+    <label>E-mail</label>
+    <input type="email" id="loginEmail" placeholder="seu@email.com">
+    <label>Senha</label>
+    <input type="password" id="loginSenha" placeholder="••••••••">
+    <button onclick="doLogin()">Entrar</button>
+    <div class="login-error" id="loginError"></div>
+  </div>
 </div>
 
-<div class="table-wrapper">
-  <table id="mainTable">
-    <thead>
-      <tr>
-        <th style="width:35px">#</th>
-        <th class="left" style="width:240px">Razão Social</th>
-        <th class="left" style="width:200px">Fantasia</th>
-        <th style="width:90px">MRR</th>
-        <th class="sortable" style="width:80px" id="th-hs" onclick="toggleSortHS()">HS ↕</th>
-        <th style="width:105px">Evolução</th>
-        <th class="sortable" style="width:110px" id="th-dias" onclick="toggleSortDias()">Últ. Tarefa (Dias) ↕</th>
-        <th style="width:110px">Minha Carteira?</th>
-        <th class="sortable" style="width:125px" id="th-t1" onclick="toggleSortDataTentativa('t1', 'th-t1', '1ª Tentativa')">1ª Tentativa ↕</th>
-        <th class="sortable" style="width:125px" id="th-t2" onclick="toggleSortDataTentativa('t2', 'th-t2', '2ª Tentativa')">2ª Tentativa ↕</th>
-        <th class="sortable" style="width:125px" id="th-t3" onclick="toggleSortDataTentativa('t3', 'th-t3', '3ª Tentativa')">3ª Tentativa ↕</th>
-        <th class="sortable" style="width:125px" id="th-tl" onclick="toggleSortDataTentativa('tl', 'th-tl', 'Ligação')">Ligação ↕</th>
-        <th style="width:180px">Canal de Contato</th>
-        <th class="sortable" style="width:100px" id="th-contato" onclick="toggleSortContato()">Contato Efetivo? ↕</th>
-        <th style="width:100px">Reunião Realizada?</th>
-      </tr>
-    </thead>
-    <tbody id="tableBody">
-    </tbody>
-  </table>
-</div>
-<p class="print-note">* Os dados de interação estão protegidos e sincronizados em tempo real na nuvem do Firebase.</p>
+<!-- ===== APP ===== -->
+<div id="appShell">
+  <div class="app-shell-inner">
+    <aside class="sidebar">
+      <div class="brand">📋 Obra Prima<br><small>Controle de Carteira</small></div>
+      <div class="nav-group-label">Visão Geral</div>
+      <button class="nav-item active" data-view="geral" onclick="switchView('geral')">📊 Visão Geral</button>
+      <div class="nav-group-label">Controle</div>
+      <button class="nav-item" data-view="controle" onclick="switchView('controle')">🗂️ Controle</button>
+      <button class="nav-item" data-view="canais" onclick="switchView('canais')">💬 Canais de Contato</button>
+      <button class="nav-item" data-view="reunioes" onclick="switchView('reunioes')">🤝 Reuniões</button>
+      <div class="nav-group-label">Análises</div>
+      <button class="nav-item" data-view="analise" onclick="switchView('analise')">📈 Análise / Indicadores</button>
+      <div class="nav-group-label">Importação</div>
+      <button class="nav-item" data-view="importacao" onclick="switchView('importacao')">⬆️ Importação de Dados</button>
 
-<div class="update-section">
-  <h3>🔄 Painel de Controle de Dados</h3>
-  <p style="color: #cbd5e1; font-size: 11px;">
-    <strong>MIGRAÇÃO DE CACHE ANTIGO:</strong> Clique no botão roxo abaixo para tentar puxar o histórico que estava salvo no cache local deste navegador para o mês selecionado.
-  </p>
-  <button class="btn btn-migrar" style="margin-top:6px; margin-bottom:12px;" onclick="executarMigracaoDoAnexo()">🔮 Migrar Dados Locais para Nuvem</button>
+      <div class="sidebar-footer">
+        <div class="user-line" id="userLine"></div>
+        <button class="btn-logout" onclick="doLogout()">Sair</button>
+      </div>
+    </aside>
 
-  <div class="panels-grid">
-    <!-- PAINEL 1: CLIENTES GERAL -->
-    <div class="panel-box">
-      <h4 style="color:#f8fafc; margin-bottom:4px;">📋 1. Base Geral de Clientes</h4>
-      <p style="color:#94a3b8; font-size:11px; margin-bottom:6px;">Razão | Fantasia | MRR | Tags/Carteira | Dias Úl. Tarefa:</p>
-      <textarea id="csvInput" placeholder="Razão Social [Tab] Fantasia [Tab] MRR [Tab] Tags... [Tab] Dias"></textarea>
-      <button class="btn btn-update" onclick="importFromPaste()">📋 Atualizar Estrutura Base</button>
-    </div>
+    <main class="main-content">
+      <div class="top-header">
+        <h1 id="viewTitle">Visão Geral</h1>
+        <div class="top-header-controls">
+          <label>Mês de Referência:</label>
+          <input type="month" id="mesReferencia" onchange="onMonthChange()">
+        </div>
+      </div>
 
-    <!-- PAINEL 2: COBERTURA / CONTATOS EFETIVOS -->
-    <div class="panel-box">
-      <h4 style="color:#f8fafc; margin-bottom:4px;">🎯 2. Importar Contatos Efetivos por Cobertura</h4>
-      <p style="color:#94a3b8; font-size:11px; margin-bottom:6px;">Cole as colunas: Razão Social | Nome Fantasia | Tipo de Cobertura</p>
-      <textarea id="coberturaInput" placeholder="Razão Social [Tab] Fantasia [Tab] Cobertura por tarefa..."></textarea>
-      <button class="btn btn-cobertura" onclick="importCoberturasEfetivas()">⚡ Processar Contatos Efetivos</button>
-    </div>
+      <!-- ================= VISÃO GERAL ================= -->
+      <section id="view-geral" class="view-panel active">
+        <div class="meta-box">
+          <label>Meta de Taxa de Resposta (%):</label>
+          <input type="number" id="metaInput" min="0" max="100" step="1">
+          <button onclick="salvarMeta()">Salvar</button>
+        </div>
 
-    <!-- PAINEL 3: SAÚDE E EVOLUÇÃO (HS) -->
-    <div class="panel-box">
-      <h4 style="color:#f8fafc; margin-bottom:4px;">📊 3. Importar Saúde e Evolução (HS)</h4>
-      <p style="color:#94a3b8; font-size:11px; margin-bottom:6px;">Cole as colunas: Nome do Cliente | N° do HS | Evolução</p>
-      <textarea id="saudeInput" placeholder="Nome do Cliente [Tab] Valor do HS [Tab] Manteve/Piorou/Melhorou"></textarea>
-      <button class="btn btn-saude" onclick="importSaudeEvolucao()">📊 Processar Saúde e HS</button>
-    </div>
+        <div class="kpi-grid">
+          <div class="kpi-card"><div class="kpi-label">Clientes</div><div class="kpi-value" id="kpi-clientes">0</div></div>
+          <div class="kpi-card"><div class="kpi-label">Contatos Efetivos</div><div class="kpi-value" id="kpi-contatos">0 / 0</div></div>
+          <div class="kpi-card"><div class="kpi-label">MRR Total</div><div class="kpi-value" id="kpi-mrr">R$ 0</div></div>
+          <div class="kpi-card"><div class="kpi-label">Tentativas (Mês)</div><div class="kpi-value" id="kpi-tentativas">0</div></div>
+          <div class="kpi-card"><div class="kpi-label">Reuniões (Mês)</div><div class="kpi-value" id="kpi-reunioes">0</div></div>
+          <div class="kpi-card"><div class="kpi-label">Taxa de Resposta</div><div class="kpi-value" id="kpi-taxa">0%</div></div>
+        </div>
+
+        <div class="chart-grid">
+          <div class="chart-card"><h3>Distribuição por Evolução</h3><canvas id="chartEvolucao"></canvas></div>
+          <div class="chart-card"><h3>Tentativas ao longo do tempo</h3><canvas id="chartTentativas"></canvas></div>
+          <div class="chart-card"><h3>Contatos Efetivos ao longo do tempo</h3><canvas id="chartContatos"></canvas></div>
+          <div class="chart-card"><h3>Taxa de Resposta</h3><canvas id="chartTaxa"></canvas></div>
+        </div>
+      </section>
+
+      <!-- ================= CONTROLE ================= -->
+      <section id="view-controle" class="view-panel">
+        <div class="toolbar">
+          <input type="text" id="search" placeholder="🔍 Filtrar por razão social ou fantasia..." oninput="onFilterChange()">
+          <select class="filter-sel" id="filterStatus" onchange="onFilterChange()">
+            <option value="">Carteira: Todos</option>
+            <option value="starter">Starter</option>
+            <option value="basic">Basic</option>
+            <option value="nao">Não</option>
+          </select>
+          <select class="filter-sel" id="filterEvolucao" onchange="onFilterChange()">
+            <option value="">Evolução: Todos</option>
+            <option value="melhorou">Melhorou</option>
+            <option value="manteve">Manteve</option>
+            <option value="piorou">Piorou</option>
+            <option value="naorespondido">Não respondido</option>
+          </select>
+          <select class="filter-sel" id="filterContato" onchange="onFilterChange()">
+            <option value="">Contato Efetivo: Todos</option>
+            <option value="sim">Sim</option>
+            <option value="nao">Não</option>
+          </select>
+          <button class="btn btn-export" onclick="window.print()">🖨️ Imprimir / Exportar PDF</button>
+          <div class="counter">Contatos efetivos no mês: <span id="count-sim">0</span> / <span id="count-total">0</span></div>
+        </div>
+
+        <div class="table-wrapper">
+          <table id="mainTable">
+            <thead>
+              <tr>
+                <th style="width:35px">#</th>
+                <th class="left" style="width:220px">Razão Social</th>
+                <th class="left" style="width:180px">Fantasia</th>
+                <th style="width:90px">MRR</th>
+                <th class="sortable" style="width:80px" id="th-hs" onclick="toggleSortHS()">HS ↕</th>
+                <th style="width:105px">Evolução</th>
+                <th class="sortable" style="width:110px" id="th-dias" onclick="toggleSortDias()">Últ. Tarefa (Dias) ↕</th>
+                <th style="width:110px">Minha Carteira?</th>
+                <th class="sortable" style="width:120px" id="th-t1" onclick="toggleSortDataTentativa('t1', 'th-t1', '1ª Tentativa')">1ª Tentativa ↕</th>
+                <th class="sortable" style="width:120px" id="th-t2" onclick="toggleSortDataTentativa('t2', 'th-t2', '2ª Tentativa')">2ª Tentativa ↕</th>
+                <th class="sortable" style="width:120px" id="th-t3" onclick="toggleSortDataTentativa('t3', 'th-t3', '3ª Tentativa')">3ª Tentativa ↕</th>
+                <th class="sortable" style="width:120px" id="th-tl" onclick="toggleSortDataTentativa('tl', 'th-tl', 'Ligação')">Ligação ↕</th>
+                <th style="width:115px">Canal</th>
+                <th style="width:160px">OBS</th>
+                <th class="sortable" style="width:100px" id="th-contato" onclick="toggleSortContato()">Contato Efetivo? ↕</th>
+                <th style="width:100px">Reunião Realizada?</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+          </table>
+        </div>
+
+        <div class="pagination-bar">
+          <div class="info" id="paginationInfo">Mostrando 0 de 0 clientes</div>
+          <div class="pages" id="paginationPages"></div>
+          <div>
+            <label style="color:#94a3b8; margin-right:6px;">Linhas por página:</label>
+            <select id="pageSizeSel" onchange="onPageSizeChange()">
+              <option value="10">10</option>
+              <option value="25">25</option>
+              <option value="50">50</option>
+              <option value="9999">Todos</option>
+            </select>
+          </div>
+        </div>
+        <p class="print-note">* Os dados de interação estão protegidos e sincronizados em tempo real na nuvem do Firebase.</p>
+      </section>
+
+      <!-- ================= CANAIS DE CONTATO ================= -->
+      <section id="view-canais" class="view-panel">
+        <div class="canal-cards" id="canalCardsWrap"></div>
+        <div class="simple-table-wrap">
+          <table class="simple-table" id="canalTable">
+            <thead><tr><th>Cliente</th><th>Fantasia</th><th>Canal</th><th>OBS</th></tr></thead>
+            <tbody id="canalTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ================= REUNIÕES ================= -->
+      <section id="view-reunioes" class="view-panel">
+        <div class="kpi-grid" style="margin-bottom:16px;">
+          <div class="kpi-card"><div class="kpi-label">Reuniões realizadas no mês</div><div class="kpi-value" id="kpi-reunioes-total">0</div></div>
+        </div>
+        <div class="simple-table-wrap">
+          <table class="simple-table" id="reunioesTable">
+            <thead><tr><th>Cliente</th><th>Fantasia</th><th>Carteira</th><th>HS</th><th>Evolução</th></tr></thead>
+            <tbody id="reunioesTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ================= ANÁLISE / INDICADORES ================= -->
+      <section id="view-analise" class="view-panel">
+        <p style="color:#94a3b8; margin-bottom:12px;">Comparativo de HS entre o mês selecionado e o mês anterior, ordenado do mais crítico para o mais saudável.</p>
+        <div class="simple-table-wrap">
+          <table class="simple-table" id="analiseTable">
+            <thead><tr><th>Cliente</th><th>Fantasia</th><th>HS Mês Atual</th><th>HS Mês Anterior</th><th>Δ HS</th><th>Evolução</th></tr></thead>
+            <tbody id="analiseTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ================= IMPORTAÇÃO ================= -->
+      <section id="view-importacao" class="view-panel">
+        <div class="update-section">
+          <h3>🔄 Painel de Controle de Dados</h3>
+          <div class="panels-grid">
+            <div class="panel-box">
+              <h4 style="color:#f8fafc; margin-bottom:4px;">📋 1. Base Geral de Clientes</h4>
+              <p style="color:#94a3b8; font-size:11px; margin-bottom:6px;">Razão | Fantasia | MRR | Tags/Carteira | Dias Úl. Tarefa:</p>
+              <textarea id="csvInput" placeholder="Razão Social [Tab] Fantasia [Tab] MRR [Tab] Tags... [Tab] Dias"></textarea>
+              <button class="btn btn-update" onclick="importFromPaste()">📋 Atualizar Estrutura Base</button>
+            </div>
+            <div class="panel-box">
+              <h4 style="color:#f8fafc; margin-bottom:4px;">🎯 2. Importar Contatos Efetivos por Cobertura</h4>
+              <p style="color:#94a3b8; font-size:11px; margin-bottom:6px;">Cole as colunas: Razão Social | Nome Fantasia | Tipo de Cobertura</p>
+              <textarea id="coberturaInput" placeholder="Razão Social [Tab] Fantasia [Tab] Cobertura por tarefa..."></textarea>
+              <button class="btn btn-cobertura" onclick="importCoberturasEfetivas()">⚡ Processar Contatos Efetivos</button>
+            </div>
+            <div class="panel-box">
+              <h4 style="color:#f8fafc; margin-bottom:4px;">📊 3. Importar Saúde e Evolução (HS)</h4>
+              <p style="color:#94a3b8; font-size:11px; margin-bottom:6px;">Cole as colunas: Nome do Cliente | N° do HS | Evolução</p>
+              <textarea id="saudeInput" placeholder="Nome do Cliente [Tab] Valor do HS [Tab] Manteve/Piorou/Melhorou"></textarea>
+              <button class="btn btn-saude" onclick="importSaudeEvolucao()">📊 Processar Saúde e HS</button>
+            </div>
+          </div>
+          <details style="margin-top:16px;">
+            <summary style="color:#94a3b8; cursor:pointer; font-size:11.5px;">Ferramentas avançadas (uso raro)</summary>
+            <p style="color: #cbd5e1; font-size: 11px; margin-top:10px;">
+              <strong>MIGRAÇÃO DE CACHE ANTIGO:</strong> tenta puxar o histórico que estava salvo no cache local deste navegador para o mês selecionado.
+            </p>
+            <button class="btn btn-migrar" style="margin-top:8px;" onclick="confirmarMigracao()">🔮 Migrar Dados Locais para Nuvem</button>
+          </details>
+        </div>
+      </section>
+    </main>
   </div>
 </div>
 
@@ -334,6 +447,7 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
+const auth = firebase.auth();
 
 let clients = [
   ["Base Engenharia Civil Ltda", "BASE ENGENHARIA", "519,20", 10],
@@ -446,13 +560,108 @@ let clients = [
 ];
 
 const STORAGE_KEY_CLIENTS = 'obra_prima_clients_mensal_v1';
-let memoryInteractions = {}; 
+let memoryInteractions = {};
+let metaTaxaResposta = 20;
 
 let currentSortOrderDias = 'asc';
-let currentSortOrderHS = 'none'; 
+let currentSortOrderHS = 'none';
 let currentSortOrderContato = 'none';
 let dateSortStates = { t1: 'none', t2: 'none', t3: 'none', tl: 'none' };
 
+let currentPage = 1;
+let pageSize = 10;
+
+let charts = { evolucao: null, tentativas: null, contatos: null, taxa: null };
+
+/* ========================= AUTENTICAÇÃO ========================= */
+function doLogin() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const senha = document.getElementById('loginSenha').value;
+  const errBox = document.getElementById('loginError');
+  errBox.textContent = '';
+  if (!email || !senha) { errBox.textContent = 'Preencha e-mail e senha.'; return; }
+
+  auth.signInWithEmailAndPassword(email, senha).catch((e) => {
+    errBox.textContent = 'Não foi possível entrar. Verifique e-mail e senha.';
+    console.error(e);
+  });
+}
+
+function doLogout() {
+  auth.signOut();
+}
+
+auth.onAuthStateChanged((user) => {
+  if (user) {
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('appShell').style.display = 'block';
+    document.getElementById('userLine').textContent = user.email || '';
+    initApp();
+  } else {
+    document.getElementById('loginScreen').style.display = 'flex';
+    document.getElementById('appShell').style.display = 'none';
+  }
+});
+
+function initApp() {
+  setDefaultMonth();
+  loadClients();
+  carregarConfig(() => {
+    carregarDadosDaNuvem(() => {
+      buildTable();
+      refreshDashboard();
+    });
+  });
+}
+
+/* ========================= NAVEGAÇÃO ========================= */
+const viewTitles = {
+  geral: 'Visão Geral',
+  controle: 'Controle',
+  canais: 'Canais de Contato',
+  reunioes: 'Reuniões',
+  analise: 'Análise / Indicadores',
+  importacao: 'Importação de Dados'
+};
+
+function switchView(view) {
+  document.querySelectorAll('.view-panel').forEach(el => el.classList.remove('active'));
+  document.getElementById('view-' + view).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.toggle('active', el.dataset.view === view));
+  document.getElementById('viewTitle').textContent = viewTitles[view] || '';
+
+  if (view === 'geral') refreshDashboard();
+  if (view === 'canais') refreshCanais();
+  if (view === 'reunioes') refreshReunioes();
+  if (view === 'analise') refreshAnalise();
+}
+
+/* ========================= CONFIG (META) ========================= */
+function carregarConfig(callback) {
+  db.ref('config/metaTaxaResposta').once('value').then((snap) => {
+    const val = snap.val();
+    metaTaxaResposta = (val !== null && val !== undefined) ? Number(val) : 20;
+    document.getElementById('metaInput').value = metaTaxaResposta;
+    if (callback) callback();
+  }).catch((e) => {
+    console.error('Erro ao ler config:', e);
+    document.getElementById('metaInput').value = metaTaxaResposta;
+    if (callback) callback();
+  });
+}
+
+function salvarMeta() {
+  const val = Number(document.getElementById('metaInput').value) || 0;
+  metaTaxaResposta = val;
+  db.ref('config/metaTaxaResposta').set(val).then(() => {
+    refreshDashboard();
+  }).catch((e) => {
+    alert('Não foi possível salvar a meta. Verifique sua conexão.');
+    console.error(e);
+  });
+}
+
+/* ========================= HELPERS DE DATA ========================= */
 function setDefaultMonth() {
   const hoje = new Date();
   const ano = hoje.getFullYear();
@@ -481,11 +690,9 @@ function obterTrimestreAno(mesStr) {
   const parts = mesStr.split('-');
   const ano = parseInt(parts[0]);
   const mes = parseInt(parts[1]);
-
   if (mes >= 3 && mes <= 5)   return { id: 'Mar-Mai', ano: ano };
   if (mes >= 6 && mes <= 8)   return { id: 'Jun-Ago', ano: ano };
   if (mes >= 9 && mes <= 11)  return { id: 'Set-Nov', ano: ano };
-  
   const anoTrimestre = (mes === 1 || mes === 2) ? ano - 1 : ano;
   return { id: 'Dez-Fev', ano: anoTrimestre };
 }
@@ -494,11 +701,15 @@ function calcularMesAnterior(mesStr) {
   const parts = mesStr.split('-');
   let ano = parseInt(parts[0]);
   let mes = parseInt(parts[1]) - 1;
-  if (mes === 0) {
-    mes = 12;
-    ano--;
-  }
+  if (mes === 0) { mes = 12; ano--; }
   return `${ano}-${String(mes).padStart(2, '0')}`;
+}
+
+function mesLabelCurto(mesStr) {
+  const nomes = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  const parts = mesStr.split('-');
+  const idx = parseInt(parts[1]) - 1;
+  return `${nomes[idx]}/${parts[0].slice(2)}`;
 }
 
 function generateId(razao) {
@@ -516,6 +727,11 @@ function limparTextoParaComparacao(str) {
     .replace(/[^a-z0-9]/g, '');
 }
 
+function parseMRR(str) {
+  if (!str) return 0;
+  return parseFloat(String(str).replace(/\./g, '').replace(',', '.')) || 0;
+}
+
 function obterDadosClienteDoCache(clientId, razao, mesKey) {
   const keyNova = `${clientId}_${mesKey}`;
   if (memoryInteractions[keyNova] && (memoryInteractions[keyNova].foiPreenchido || memoryInteractions[keyNova].starter)) {
@@ -529,6 +745,7 @@ function obterDadosClienteDoCache(clientId, razao, mesKey) {
   return null;
 }
 
+/* ========================= SALVAR ========================= */
 function saveData() {
   const mesSelecionado = document.getElementById('mesReferencia').value;
   const updates = {};
@@ -538,7 +755,7 @@ function saveData() {
     const storageKeyUnique = `${clientId}_${mesSelecionado}`;
 
     const hsVal = row.querySelector('.hs-cell-value').textContent;
-    const evoVal = row.querySelector('.evo-cell-value').textContent;
+    const evoVal = row.querySelector('.evo-cell-value').dataset.real || '';
 
     const dataObj = {
       starter: row.querySelector('.starter-sel').value,
@@ -552,64 +769,114 @@ function saveData() {
       t3d: row.querySelector('.t3-date').value,
       tl: row.querySelector('.tl-chk').checked,
       tld: row.querySelector('.tl-date').value,
-      canal: row.querySelector('.canal-textarea').value,
+      canalTipo: row.querySelector('.canal-sel').value,
+      canalObs: row.querySelector('.canal-obs-textarea').value,
       contato: row.querySelector('.contato-sel').value,
-      reuniao: row.querySelector('.reuniao-sel').value, // Salva o novo campo na nuvem
+      reuniao: row.querySelector('.reuniao-sel').value,
       foiPreenchido: true
     };
 
     memoryInteractions[storageKeyUnique] = dataObj;
     updates['/interacoes/' + storageKeyUnique] = dataObj;
   });
-  
+
   db.ref().update(updates).then(() => {
     updateCounter();
-  }).catch((e) => console.error("Erro ao salvar no Firebase:", e));
+  }).catch((e) => alert('Falha ao salvar. Verifique sua conexão com a internet.') || console.error("Erro ao salvar no Firebase:", e));
+}
+
+/* ========================= TABELA CONTROLE ========================= */
+function getFilteredClients() {
+  const mes = document.getElementById('mesReferencia').value;
+  const q = (document.getElementById('search').value || '').toLowerCase();
+  const fStatus = document.getElementById('filterStatus').value;
+  const fEvo = document.getElementById('filterEvolucao').value;
+  const fContato = document.getElementById('filterContato').value;
+
+  return clients.filter(([razao, fantasia]) => {
+    if (q && !razao.toLowerCase().includes(q) && !fantasia.toLowerCase().includes(q)) return false;
+    if (!fStatus && !fEvo && !fContato) return true;
+
+    const clientId = generateId(razao);
+    const s = obterDadosClienteDoCache(clientId, razao, mes) || {};
+    const starter = s.foiPreenchido ? (s.starter || 'starter') : (s.starter || 'starter');
+
+    if (fStatus && starter !== fStatus) return false;
+
+    if (fContato) {
+      const contatoVal = s.foiPreenchido ? (s.contato || 'nao') : 'nao';
+      if (contatoVal !== fContato) return false;
+    }
+
+    if (fEvo) {
+      const evoRaw = s.foiPreenchido ? (s.evolucao || '') : '';
+      const evoNorm = !evoRaw.trim() ? 'naorespondido' : evoRaw.trim().toLowerCase();
+      if (evoNorm !== fEvo) return false;
+    }
+    return true;
+  });
+}
+
+function onFilterChange() {
+  currentPage = 1;
+  buildTable();
+}
+
+function onPageSizeChange() {
+  pageSize = parseInt(document.getElementById('pageSizeSel').value);
+  currentPage = 1;
+  buildTable();
 }
 
 function buildTable() {
   const mesSelecionado = document.getElementById('mesReferencia').value;
   const trimAtual = obterTrimestreAno(mesSelecionado);
 
+  const filtered = getFilteredClients();
+  const totalFiltered = filtered.length;
+  const totalPages = Math.max(1, Math.ceil(totalFiltered / pageSize));
+  if (currentPage > totalPages) currentPage = totalPages;
+  const startIdx = (currentPage - 1) * pageSize;
+  const pageItems = filtered.slice(startIdx, startIdx + pageSize);
+
   const tbody = document.getElementById('tableBody');
   tbody.innerHTML = '';
 
-  clients.forEach(([razao, fantasia, mrr, dias], i) => {
+  pageItems.forEach(([razao, fantasia, mrr, dias], localI) => {
+    const i = startIdx + localI;
     const clientId = generateId(razao);
     const s = obterDadosClienteDoCache(clientId, razao, mesSelecionado) || {};
-    
+
     let starter = s.starter;
     let hsValor = s.foiPreenchido ? s.hs : '';
     let evolucaoValor = s.foiPreenchido ? (s.evolucao || '') : '';
     let contato = s.contato;
-    let reuniaoValor = s.reuniao || 'nao'; // Puxa o valor da reunião ou assume 'nao' por padrão
+    let reuniaoValor = s.reuniao || 'nao';
+    let canalTipo = s.foiPreenchido ? (s.canalTipo || '') : '';
+    let canalObs = s.foiPreenchido ? (s.canalObs !== undefined ? s.canalObs : (s.canal || '')) : '';
 
     if (!s.foiPreenchido) {
       let mesVarredura = calcularMesAnterior(mesSelecionado);
       let achouDadosValidos = false;
+      let guarda = 0;
 
-      while (true) {
+      while (guarda < 36) {
+        guarda++;
         const trimVarredura = obterTrimestreAno(mesVarredura);
-        
         if (trimVarredura.id !== trimAtual.id || trimVarredura.ano !== trimAtual.ano) {
           const sLimite = obterDadosClienteDoCache(clientId, razao, mesVarredura) || {};
           starter = sLimite.starter || 'starter';
           break;
         }
-
         const sVarredura = obterDadosClienteDoCache(clientId, razao, mesVarredura);
         if (sVarredura && (sVarredura.foiPreenchido || sVarredura.starter)) {
           starter = sVarredura.starter || 'starter';
           achouDadosValidos = true;
           break;
         }
-
         mesVarredura = calcularMesAnterior(mesVarredura);
       }
-
-      if (!achouDadosValidos && starter === undefined) {
-        starter = 'starter';
-      }
+      if (!achouDadosValidos && starter === undefined) starter = 'starter';
       contato = 'nao';
       reuniaoValor = 'nao';
     } else {
@@ -625,10 +892,12 @@ function buildTable() {
       else if (numHS >= 30 && numHS <= 100) hsClass = "hs-saudavel";
     }
 
-    let evoClass = "evo-manteve";
+    let evoClass = "evo-naorespondido";
+    let evoLabel = "Não respondido";
     const evoLimpa = evolucaoValor.trim().toLowerCase();
-    if (evoLimpa === "piorou") evoClass = "evo-piorou";
-    else if (evoLimpa === "melhorou") evoClass = "evo-melhorou";
+    if (evoLimpa === "piorou") { evoClass = "evo-piorou"; evoLabel = "Piorou"; }
+    else if (evoLimpa === "melhorou") { evoClass = "evo-melhorou"; evoLabel = "Melhorou"; }
+    else if (evoLimpa === "manteve") { evoClass = "evo-manteve"; evoLabel = "Manteve"; }
 
     const t1 = s.foiPreenchido ? !!s.t1 : false;
     const t1d = s.foiPreenchido ? s.t1d || '' : '';
@@ -638,16 +907,12 @@ function buildTable() {
     const t3d = s.foiPreenchido ? s.t3d || '' : '';
     const tl = s.foiPreenchido ? !!s.tl : false;
     const tld = s.foiPreenchido ? s.tld || '' : '';
-    const canalTexto = s.foiPreenchido ? s.canal || '' : '';
-    
+
     const valDias = dias !== undefined && dias !== null ? dias : '';
 
     const tr = document.createElement('tr');
     tr.dataset.clientId = clientId;
     tr.dataset.dias = valDias;
-    tr.dataset.razao = razao.toLowerCase();
-    tr.dataset.fantasia = fantasia.toLowerCase();
-    
     if (contato === 'sim') tr.classList.add('contato-sim');
     if (starter === 'nao') tr.classList.add('starter-nao');
 
@@ -656,12 +921,8 @@ function buildTable() {
       <td class="left razao">${escHtml(razao)}</td>
       <td class="left fantasia">${escHtml(fantasia)}</td>
       <td>R$ ${escHtml(mrr || '0,00')}</td>
-      <td>
-        <span class="hs-cell-block ${hsClass} hs-cell-value">${escHtml(hsValor)}</span>
-      </td>
-      <td>
-        <span class="evo-cell-block ${evoClass} evo-cell-value">${escHtml(evolucaoValor || 'Manteve')}</span>
-      </td>
+      <td><span class="hs-cell-block ${hsClass} hs-cell-value">${escHtml(hsValor)}</span></td>
+      <td><span class="evo-cell-block ${evoClass} evo-cell-value" data-real="${escHtml(evolucaoValor)}">${escHtml(evoLabel)}</span></td>
       <td style="font-weight: 600;">${valDias}</td>
       <td>
         <select class="custom-sel starter-sel ${starter}" onchange="onStarterChange(this)">
@@ -670,40 +931,26 @@ function buildTable() {
           <option value="nao" ${starter === 'nao' ? 'selected' : ''}>Não</option>
         </select>
       </td>
+      <td><div class="check-group"><input type="checkbox" class="t1-chk" ${t1 ? 'checked' : ''}><input type="date" class="t1-date" value="${t1d}" oninput="onDateInput(this, '.t1-chk')"></div></td>
+      <td><div class="check-group"><input type="checkbox" class="t2-chk" ${t2 ? 'checked' : ''}><input type="date" class="t2-date" value="${t2d}" oninput="onDateInput(this, '.t2-chk')"></div></td>
+      <td><div class="check-group"><input type="checkbox" class="t3-chk" ${t3 ? 'checked' : ''}><input type="date" class="t3-date" value="${t3d}" oninput="onDateInput(this, '.t3-chk')"></div></td>
+      <td><div class="check-group"><input type="checkbox" class="tl-chk" ${tl ? 'checked' : ''}><input type="date" class="tl-date" value="${tld}" oninput="onDateInput(this, '.tl-chk')"></div></td>
       <td>
-        <div class="check-group">
-          <input type="checkbox" class="t1-chk" ${t1 ? 'checked' : ''}>
-          <input type="date" class="t1-date" value="${t1d}" oninput="onDateInput(this, '.t1-chk')">
-        </div>
+        <select class="custom-sel canal-sel" onchange="saveData()">
+          <option value="" ${!canalTipo ? 'selected' : ''}>A definir</option>
+          <option value="whatsapp" ${canalTipo === 'whatsapp' ? 'selected' : ''}>WhatsApp</option>
+          <option value="email" ${canalTipo === 'email' ? 'selected' : ''}>E-mail</option>
+          <option value="ligacao" ${canalTipo === 'ligacao' ? 'selected' : ''}>Ligação</option>
+          <option value="outro" ${canalTipo === 'outro' ? 'selected' : ''}>Outro</option>
+        </select>
       </td>
-      <td>
-        <div class="check-group">
-          <input type="checkbox" class="t2-chk" ${t2 ? 'checked' : ''}>
-          <input type="date" class="t2-date" value="${t2d}" oninput="onDateInput(this, '.t2-chk')">
-        </div>
-      </td>
-      <td>
-        <div class="check-group">
-          <input type="checkbox" class="t3-chk" ${t3 ? 'checked' : ''}>
-          <input type="date" class="t3-date" value="${t3d}" oninput="onDateInput(this, '.t3-chk')">
-        </div>
-      </td>
-      <td>
-        <div class="check-group">
-          <input type="checkbox" class="tl-chk" ${tl ? 'checked' : ''}>
-          <input type="date" class="tl-date" value="${tld}" oninput="onDateInput(this, '.tl-chk')">
-        </div>
-      </td>
-      <td>
-        <textarea class="custom-textarea-input canal-textarea" oninput="saveData()">${escHtml(canalTexto)}</textarea>
-      </td>
+      <td><textarea class="custom-textarea-input canal-obs-textarea" oninput="saveData()" placeholder="Observações...">${escHtml(canalObs)}</textarea></td>
       <td>
         <select class="custom-sel contato-sel ${contato}" onchange="onContatoChange(this)">
           <option value="nao" ${contato === 'nao' ? 'selected' : ''}>Não</option>
           <option value="sim" ${contato === 'sim' ? 'selected' : ''}>Sim</option>
         </select>
       </td>
-      <!-- Nova Coluna Neutra: Reunião Realizada? -->
       <td>
         <select class="custom-sel reuniao-sel" onchange="saveData()">
           <option value="nao" ${reuniaoValor === 'nao' ? 'selected' : ''}>Não</option>
@@ -711,402 +958,37 @@ function buildTable() {
         </select>
       </td>
     `;
-
     tbody.appendChild(tr);
   });
 
-  filterTable();
+  renderPagination(totalFiltered, totalPages);
   updateCounter();
 }
 
-function importCoberturasEfetivas() {
-  const input = document.getElementById('coberturaInput').value.trim();
-  if (!input) return alert("Por favor, cole a planilha de cobertura primeiro.");
-  
-  const mesSelecionado = document.getElementById('mesReferencia').value;
-  const lines = input.split('\n');
-  const updates = {};
-  let contadosModificados = 0;
+function renderPagination(totalFiltered, totalPages) {
+  const start = totalFiltered === 0 ? 0 : (currentPage - 1) * pageSize + 1;
+  const end = Math.min(currentPage * pageSize, totalFiltered);
+  document.getElementById('paginationInfo').textContent = `Mostrando ${start} a ${end} de ${totalFiltered} clientes`;
 
-  lines.forEach(line => {
-    const tokens = line.includes('\t') ? line.split('\t') : line.split(';');
-    if (tokens.length >= 3) {
-      const razaoPlanilha = limparTextoParaComparacao(tokens[0].trim());
-      const fantasiaPlanilha = limparTextoParaComparacao(tokens[1].trim());
-      const tipoCobertura = tokens[2].trim().toLowerCase();
+  const pagesWrap = document.getElementById('paginationPages');
+  pagesWrap.innerHTML = '';
 
-      const indexCliente = clients.findIndex(c => 
-        limparTextoParaComparacao(c[0]) === razaoPlanilha || 
-        limparTextoParaComparacao(c[1]) === fantasiaPlanilha ||
-        razaoPlanilha.includes(limparTextoParaComparacao(c[1])) ||
-        limparTextoParaComparacao(c[0]).includes(razaoPlanilha)
-      );
-
-      if (indexCliente !== -1) {
-        const clienteReal = clients[indexCliente];
-        const clientId = generateId(clienteReal[0]);
-        const storageKeyUnique = `${clientId}_${mesSelecionado}`;
-
-        const trVigente = document.querySelector(`tr[data-client-id="${clientId}"]`);
-        const hsValorVigente = trVigente ? trVigente.querySelector('.hs-cell-value').textContent : '';
-        const evoValorVigente = trVigente ? trVigente.querySelector('.evo-cell-value').textContent : '';
-        const reuniaoValorVigente = trVigente ? trVigente.querySelector('.reuniao-sel').value : 'nao';
-
-        const estadoAtual = memoryInteractions[storageKeyUnique] || {
-          starter: 'starter', t1: false, t1d: '', t2: false, t2d: '', t3: false, t3d: '', tl: false, tld: '', canal: ''
-        };
-
-        estadoAtual.hs = hsValorVigente;
-        estadoAtual.evolucao = evoValorVigente;
-        estadoAtual.reuniao = reuniaoValorVigente;
-
-        if (tipoCobertura.includes("cobertura por tarefa")) {
-          estadoAtual.contato = 'sim';
-        } else if (tipoCobertura.includes("sem cobertura")) {
-          estadoAtual.contato = 'nao';
-        }
-        
-        estadoAtual.foiPreenchido = true;
-
-        memoryInteractions[storageKeyUnique] = estadoAtual;
-        updates['/interacoes/' + storageKeyUnique] = estadoAtual;
-        contadosModificados++;
-      }
-    }
-  });
-
-  if (contadosModificados > 0) {
-    db.ref().update(updates).then(() => {
-      buildTable();
-      document.getElementById('coberturaInput').value = '';
-      alert(`⚡ Sucesso! ${contadosModificados} status de contato atualizados e salvos na nuvem.`);
-    });
-  } else {
-    alert("Nenhum cliente correspondente foi localizado na lista de coberturas.");
-  }
-}
-
-function importSaudeEvolucao() {
-  const input = document.getElementById('saudeInput').value.trim();
-  if (!input) return alert("Por favor, cole os dados de saúde primeiro.");
-
-  const mesSelecionado = document.getElementById('mesReferencia').value;
-  const lines = input.split('\n');
-  const updates = {};
-  let processados = 0;
-
-  lines.forEach(line => {
-    const tokens = line.includes('\t') ? line.split('\t') : line.split(';');
-    if (tokens.length >= 3) {
-      const nomePlanilhaLimpo = limparTextoParaComparacao(tokens[0].trim());
-      const valorHS = tokens[1].trim().replace(/[^0-9\-]/g, ''); 
-      let evoTexto = tokens[2].trim().toLowerCase();
-
-      if (evoTexto.includes("piorou")) evoTexto = "Piorou";
-      else if (evoTexto.includes("melhorou")) evoTexto = "Melhorou";
-      else evoTexto = "Manteve";
-
-      const indexCliente = clients.findIndex(c => 
-        limparTextoParaComparacao(c[0]) === nomePlanilhaLimpo || 
-        limparTextoParaComparacao(c[1]) === nomePlanilhaLimpo ||
-        nomePlanilhaLimpo.includes(limparTextoParaComparacao(c[1])) ||
-        limparTextoParaComparacao(c[0]).includes(nomePlanilhaLimpo)
-      );
-
-      if (indexCliente !== -1) {
-        const clienteReal = clients[indexCliente];
-        const clientId = generateId(clienteReal[0]);
-        const storageKeyUnique = `${clientId}_${mesSelecionado}`;
-
-        const trVigente = document.querySelector(`tr[data-client-id="${clientId}"]`);
-        const reuniaoValorVigente = trVigente ? trVigente.querySelector('.reuniao-sel').value : 'nao';
-
-        const estadoAtual = memoryInteractions[storageKeyUnique] || {
-          starter: 'starter', t1: false, t1d: '', t2: false, t2d: '', t3: false, t3d: '', tl: false, tld: '', canal: '', contato: 'nao'
-        };
-
-        estadoAtual.hs = valorHS;
-        estadoAtual.evolucao = evoTexto;
-        estadoAtual.reuniao = reuniaoValorVigente;
-        estadoAtual.foiPreenchido = true;
-
-        memoryInteractions[storageKeyUnique] = estadoAtual;
-        updates['/interacoes/' + storageKeyUnique] = estadoAtual;
-        processados++;
-      }
-    }
-  });
-
-  if (processados > 0) {
-    db.ref().update(updates).then(() => {
-      buildTable();
-      document.getElementById('saudeInput').value = '';
-      alert(`⚡ Sucesso! Saúde e Evolução de ${processados} clientes processados e salvos com sucesso na nuvem!`);
-    });
-  } else {
-    alert("Nenhum cliente correspondente foi localizado na lista de saúde. Verifique os nomes das empresas.");
-  }
-}
-
-function onMonthChange() {
-  buildTable();
-}
-
-function resetaHeadersExcept(idAtivo) {
-  const headers = {
-    'th-hs': 'HS ↕',
-    'th-dias': 'Últ. Tarefa (Dias) ↕',
-    'th-t1': '1ª Tentativa ↕',
-    'th-t2': '2ª Tentativa ↕',
-    'th-t3': '3ª Tentativa ↕',
-    'th-tl': 'Ligação ↕',
-    'th-contato': 'Contato Efetivo? ↕'
+  const addBtn = (label, page, disabled, current) => {
+    const b = document.createElement('button');
+    b.className = 'page-btn' + (current ? ' current' : '');
+    b.textContent = label;
+    b.disabled = !!disabled;
+    b.onclick = () => { currentPage = page; buildTable(); };
+    pagesWrap.appendChild(b);
   };
-  Object.keys(headers).forEach(id => {
-    if (id !== idAtivo) document.getElementById(id).innerHTML = headers[id];
-  });
-  if (idAtivo !== 'th-contato') currentSortOrderContato = 'none';
-  if (idAtivo !== 'th-hs') currentSortOrderHS = 'none';
-  Object.keys(dateSortStates).forEach(k => {
-    if (`th-${k}` !== idAtivo) dateSortStates[k] = 'none';
-  });
-}
 
-function getInteractionValue(razao, campoData) {
-  const mes = document.getElementById('mesReferencia').value;
-  const clientId = generateId(razao);
-  const dataObj = obterDadosClienteDoCache(clientId, razao, mes);
-  if (dataObj) {
-    if (campoData === 't1') return dataObj.t1d || '';
-    if (campoData === 't2') return dataObj.t2d || '';
-    if (campoData === 't3') return dataObj.t3d || '';
-    if (campoData === 'tl') return dataObj.tld || '';
-  }
-  return '';
-}
-
-function toggleSortHS() {
-  const thHS = document.getElementById('th-hs');
-  resetaHeadersExcept('th-hs');
-  const mes = document.getElementById('mesReferencia').value;
-
-  if (currentSortOrderHS === 'asc' || currentSortOrderHS === 'none') {
-    clients.sort((a, b) => {
-      const valA = parseFloat(obterDadosClienteDoCache(generateId(a[0]), a[0], mes)?.hs) || 0;
-      const valB = parseFloat(obterDadosClienteDoCache(generateId(b[0]), b[0], mes)?.hs) || 0;
-      return valA - valB; 
-    });
-    currentSortOrderHS = 'desc';
-    thHS.innerHTML = "HS 🔼 Menor para Maior";
-  } else {
-    clients.sort((a, b) => {
-      const valA = parseFloat(obterDadosClienteDoCache(generateId(a[0]), a[0], mes)?.hs) || 0;
-      const valB = parseFloat(obterDadosClienteDoCache(generateId(b[0]), b[0], mes)?.hs) || 0;
-      return valB - valA; 
-    });
-    currentSortOrderHS = 'asc';
-    thHS.innerHTML = "HS 🔽 Maior para Menor";
-  }
-  buildTable();
-}
-
-function toggleSortDataTentativa(campo, thId, labelOriginal) {
-  const th = document.getElementById(thId);
-  resetaHeadersExcept(thId);
-
-  let proximoEstado = 'sem-data-topo';
-  if (dateSortStates[campo] === 'sem-data-topo') proximoEstado = 'antigo-novo';
-  else if (dateSortStates[campo] === 'antigo-novo') proximoEstado = 'novo-antigo';
-
-  dateSortStates[campo] = proximoEstado;
-
-  clients.sort((a, b) => {
-    const dataA = getInteractionValue(a[0], campo);
-    const dataB = getInteractionValue(b[0], campo);
-
-    if (proximoEstado === 'sem-data-topo') {
-      if (!dataA && dataB) return -1;
-      if (dataA && !dataB) return 1;
-      if (!dataA && !dataB) return (Number(b[3]) || 0) - (Number(a[3]) || 0);
-      return dataA.localeCompare(dataB);
-    }
-    
-    if (proximoEstado === 'antigo-novo') {
-      if (!dataA && dataB) return 1;
-      if (dataA && !dataB) return -1;
-      if (!dataA && !dataB) return (Number(b[3]) || 0) - (Number(a[3]) || 0);
-      return dataA.localeCompare(dataB);
-    }
-
-    if (proximoEstado === 'novo-antigo') {
-      if (!dataA && dataB) return 1;
-      if (dataA && !dataB) return -1;
-      if (!dataA && !dataB) return (Number(b[3]) || 0) - (Number(a[3]) || 0);
-      return dataB.localeCompare(dataA);
-    }
-  });
-
-  if (proximoEstado === 'sem-data-topo') th.innerHTML = `${labelOriginal} ⚪ Vazios Topo`;
-  if (proximoEstado === 'antigo-novo') th.innerHTML = `${labelOriginal} 🔼 Antigos`;
-  if (proximoEstado === 'novo-antigo') th.innerHTML = `${labelOriginal} 🔽 Novos`;
-
-  buildTable();
-}
-
-function toggleSortDias() {
-  const thDias = document.getElementById('th-dias');
-  resetaHeadersExcept('th-dias');
-
-  if (currentSortOrderDias === 'asc') {
-    clients.sort((a, b) => (Number(a[3]) || 0) - (Number(b[3]) || 0));
-    currentSortOrderDias = 'desc';
-    thDias.innerHTML = "Últ. Tarefa (Dias) 🔼";
-  } else {
-    clients.sort((a, b) => (Number(b[3]) || 0) - (Number(a[3]) || 0));
-    currentSortOrderDias = 'asc';
-    thDias.innerHTML = "Últ. Tarefa (Dias) 🔽";
-  }
-  buildTable();
-}
-
-function toggleSortContato() {
-  const thContato = document.getElementById('th-contato');
-  resetaHeadersExcept('th-contato');
-  const multiplicadorDias = (currentSortOrderDias === 'desc') ? 1 : -1;
-
-  clients.sort((a, b) => {
-    const mes = document.getElementById('mesReferencia').value;
-    const statusA = (obterDadosClienteDoCache(generateId(a[0]), a[0], mes)?.contato) || 'nao';
-    const statusB = (obterDadosClienteDoCache(generateId(b[0]), b[0], mes)?.contato) || 'nao';
-    
-    if (currentSortOrderContato !== 'sim-primeiro') {
-      if (statusA === 'sim' && statusB === 'nao') return -1;
-      if (statusA === 'nao' && statusB === 'sim') return 1;
-    } else {
-      if (statusA === 'nao' && statusB === 'sim') return -1;
-      if (statusA === 'sim' && statusB === 'nao') return 1;
-    }
-    return ((Number(a[3]) || 0) - (Number(b[3]) || 0)) * multiplicadorDias;
-  });
-
-  if (currentSortOrderContato !== 'sim-primeiro') {
-    currentSortOrderContato = 'sim-primeiro';
-    thContato.innerHTML = "Contato Efetivo? 🟢 Sim primeiro";
-  } else {
-    currentSortOrderContato = 'nao-primeiro';
-    thContato.innerHTML = "Contato Efetivo? 🔴 Não primeiro";
-  }
-  buildTable();
-}
-
-function executingMigracaoDoAnexo() { // Mantendo retrocompatibilidade de nomenclatura
-  executarMigracaoDoAnexo();
-}
-
-function executarMigracaoDoAnexo() {
-  try {
-    const rawAnexo = localStorage.getItem('obra_prima_interactions_v4') || localStorage.getItem('obra_prima_interactions_mensal_v1');
-    if (!rawAnexo) {
-      alert("Histórico antigo não detectado no cache local deste navegador.");
-      return;
-    }
-    const dadosAnexo = JSON.parse(rawAnexo);
-    const mesSelecionado = document.getElementById('mesReferencia').value;
-    const updates = {};
-
-    Object.keys(dadosAnexo).forEach(key => {
-      const clientId = key.includes('_202') ? key.split('_202')[0] : key;
-      const chaveDestinoMensal = `${clientId}_${mesSelecionado}`;
-      const antigoDado = dadosAnexo[key];
-      
-      let cart = 'starter';
-      if (antigoDado.starter === 'sim' || antigoDado.starter === true || antigoDado.starter === 'starter') cart = 'starter';
-      else if (antigoDado.starter === 'basic') cart = 'basic';
-      else if (antigoDado.starter === 'nao') cart = 'nao';
-      
-      const dataObj = {
-        starter: cart,
-        hs: '',
-        evolucao: '',
-        reuniao: 'nao',
-        t1: false, t1d: '',
-        t2: false, t2d: '',
-        t3: false, t3d: '',
-        tl: false, tld: '',
-        canal: '',
-        contato: 'nao',
-        foiPreenchido: true
-      };
-
-      memoryInteractions[chaveDestinoMensal] = dataObj;
-      updates['/interacoes/' + chaveDestinoMensal] = dataObj;
-    });
-
-    db.ref().update(updates).then(() => {
-      buildTable();
-      alert("⚡ Sincronização e migração enviadas com sucesso para a nuvem!");
-    });
-  } catch(e) {
-    alert("Falha ao processar a migração do banco de dados.");
-  }
-}
-
-function importFromPaste() {
-  const input = document.getElementById('csvInput').value.trim();
-  if (!input) { return alert("Cole os dados primeiro."); }
-  
-  const mesSelecionado = document.getElementById('mesReferencia').value;
-  const lines = input.split('\n');
-  const newClients = [];
-  const updates = {};
-
-  lines.forEach(line => {
-    const tokens = line.includes('\t') ? line.split('\t') : line.split(';');
-    if (tokens.length >= 5) {
-      const razao = tokens[0].trim();
-      const fantasia = tokens[1].trim();
-      const mrr = tokens[2].trim();
-      const tagsCélula = tokens[3].trim().toLowerCase(); 
-      const dias = parseInt(tokens[4].trim().replace(/[^0-9]/g, '')) || 0;
-
-      if (razao) {
-        newClients.push([razao, fantasia, mrr, dias]);
-
-        let carteiraIdentificada = 'starter'; 
-        if (tagsCélula.includes('basic')) {
-          carteiraIdentificada = 'basic';
-        } else if (tagsCélula.includes('starter')) {
-          carteiraIdentificada = 'starter';
-        }
-
-        const clientId = generateId(razao);
-        const storageKeyUnique = `${clientId}_${mesSelecionado}`;
-
-        const estadoExistente = memoryInteractions[storageKeyUnique] || {
-          hs: '', evolucao: '', reuniao: 'nao', t1: false, t1d: '', t2: false, t2d: '', t3: false, t3d: '', tl: false, tld: '', canal: '', contato: 'nao'
-        };
-
-        estadoExistente.starter = carteiraIdentificada;
-        estadoExistente.foiPreenchido = true;
-
-        memoryInteractions[storageKeyUnique] = estadoExistente;
-        updates['/interacoes/' + storageKeyUnique] = estadoExistente;
-      }
-    }
-  });
-
-  if (newClients.length > 0) {
-    clients = newClients;
-    localStorage.setItem(STORAGE_KEY_CLIENTS, JSON.stringify(clients));
-    
-    db.ref().update(updates).then(() => {
-      buildTable();
-      document.getElementById('csvInput').value = '';
-      alert("Lista de clientes importada! A estrutura base e os dados de carteira (Starter/Basic) foram atualizados com sucesso.");
-    });
-  } else {
-    alert("Nenhum dado válido pôde ser importado. Certifique-se de copiar as 5 colunas da planilha.");
-  }
+  addBtn('‹', Math.max(1, currentPage - 1), currentPage === 1, false);
+  const maxButtons = 5;
+  let startP = Math.max(1, currentPage - 2);
+  let endP = Math.min(totalPages, startP + maxButtons - 1);
+  startP = Math.max(1, endP - maxButtons + 1);
+  for (let p = startP; p <= endP; p++) addBtn(String(p), p, false, p === currentPage);
+  addBtn('›', Math.min(totalPages, currentPage + 1), currentPage === totalPages, false);
 }
 
 function onDateInput(dateInput, chkSelector) {
@@ -1135,28 +1017,14 @@ function onContatoChange(sel) {
 function updateCounter() {
   const total = clients.length;
   const mesSelecionado = document.getElementById('mesReferencia').value;
-  
   let simsCount = 0;
   clients.forEach(c => {
     const clientId = generateId(c[0]);
     const d = obterDadosClienteDoCache(clientId, c[0], mesSelecionado);
-    if (d && d.contato === 'sim') {
-      simsCount++;
-    }
+    if (d && d.contato === 'sim') simsCount++;
   });
-  
   document.getElementById('count-sim').textContent = simsCount;
   document.getElementById('count-total').textContent = total;
-}
-
-function filterTable() {
-  const q = document.getElementById('search').value.toLowerCase();
-  document.querySelectorAll('tbody tr').forEach(tr => {
-    const razao = tr.querySelector('.razao').textContent.toLowerCase();
-    const fantasia = tr.querySelector('.fantasia').textContent.toLowerCase();
-    const match = razao.includes(q) || fantasia.includes(q);
-    tr.style.display = match ? '' : 'none';
-  });
 }
 
 function escHtml(s) {
@@ -1164,11 +1032,593 @@ function escHtml(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-setDefaultMonth();
-loadClients();
-carregarDadosDaNuvem(() => {
+/* ========================= AGREGAÇÃO / DASHBOARD ========================= */
+function computeMonthlyAggregate(mes) {
+  let mrrTotal = 0, contatosEfetivos = 0, tentativas = 0, reunioes = 0;
+  const evoCounts = { melhorou: 0, manteve: 0, piorou: 0, naorespondido: 0 };
+
+  clients.forEach(([razao, fantasia, mrr]) => {
+    const clientId = generateId(razao);
+    const s = obterDadosClienteDoCache(clientId, razao, mes) || {};
+    mrrTotal += parseMRR(mrr);
+
+    if (s.foiPreenchido) {
+      if (s.contato === 'sim') contatosEfetivos++;
+      if (s.t1) tentativas++;
+      if (s.t2) tentativas++;
+      if (s.t3) tentativas++;
+      if (s.tl) tentativas++;
+      if (s.reuniao === 'sim') reunioes++;
+
+      const evo = (s.evolucao || '').trim().toLowerCase();
+      if (evo === 'piorou') evoCounts.piorou++;
+      else if (evo === 'melhorou') evoCounts.melhorou++;
+      else if (evo === 'manteve') evoCounts.manteve++;
+      else evoCounts.naorespondido++;
+    } else {
+      evoCounts.naorespondido++;
+    }
+  });
+
+  const totalClientes = clients.length;
+  const taxaResposta = totalClientes ? (contatosEfetivos / totalClientes * 100) : 0;
+  return { totalClientes, contatosEfetivos, mrrTotal, tentativas, reunioes, taxaResposta, evoCounts };
+}
+
+function ultimosMeses(mesFinal, qtd) {
+  const arr = [mesFinal];
+  let m = mesFinal;
+  for (let i = 1; i < qtd; i++) {
+    m = calcularMesAnterior(m);
+    arr.unshift(m);
+  }
+  return arr;
+}
+
+function refreshDashboard() {
+  const mes = document.getElementById('mesReferencia').value;
+  const agg = computeMonthlyAggregate(mes);
+
+  document.getElementById('kpi-clientes').textContent = agg.totalClientes;
+  document.getElementById('kpi-contatos').textContent = `${agg.contatosEfetivos} / ${agg.totalClientes}`;
+  document.getElementById('kpi-mrr').textContent = 'R$ ' + agg.mrrTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  document.getElementById('kpi-tentativas').textContent = agg.tentativas;
+  document.getElementById('kpi-reunioes').textContent = agg.reunioes;
+  document.getElementById('kpi-taxa').textContent = agg.taxaResposta.toFixed(1).replace('.', ',') + '%';
+
+  const meses = ultimosMeses(mes, 7);
+  const labels = meses.map(mesLabelCurto);
+  const aggsHist = meses.map(m => computeMonthlyAggregate(m));
+
+  renderDoughnut(agg.evoCounts);
+  renderLineTentativas(labels, aggsHist);
+  renderLineContatos(labels, aggsHist);
+  renderLineTaxa(labels, aggsHist);
+}
+
+function renderDoughnut(evoCounts) {
+  const ctx = document.getElementById('chartEvolucao');
+  const data = [evoCounts.melhorou, evoCounts.manteve, evoCounts.piorou, evoCounts.naorespondido];
+  const cfg = {
+    type: 'doughnut',
+    data: {
+      labels: ['Melhorou', 'Manteve', 'Piorou', 'Não respondido'],
+      datasets: [{ data, backgroundColor: ['#4ade80', '#eab308', '#f87171', '#64748b'], borderWidth: 0 }]
+    },
+    options: {
+      plugins: { legend: { position: 'right', labels: { color: '#cbd5e1', font: { size: 11 } } } },
+      cutout: '65%'
+    }
+  };
+  if (charts.evolucao) { charts.evolucao.data = cfg.data; charts.evolucao.update(); }
+  else charts.evolucao = new Chart(ctx, cfg);
+}
+
+function renderLineTentativas(labels, aggsHist) {
+  const ctx = document.getElementById('chartTentativas');
+  const cfg = {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        { label: 'Tentativas realizadas', data: aggsHist.map(a => a.tentativas), borderColor: '#eab308', backgroundColor: 'transparent', tension: 0.3 },
+        { label: 'Contatos efetivos', data: aggsHist.map(a => a.contatosEfetivos), borderColor: '#4ade80', backgroundColor: 'transparent', tension: 0.3 }
+      ]
+    },
+    options: { plugins: { legend: { labels: { color: '#cbd5e1', font: { size: 10.5 } } } }, scales: { x: { ticks: { color: '#94a3b8' }, grid: { color: '#334155' } }, y: { ticks: { color: '#94a3b8' }, grid: { color: '#334155' } } } }
+  };
+  if (charts.tentativas) { charts.tentativas.data = cfg.data; charts.tentativas.update(); }
+  else charts.tentativas = new Chart(ctx, cfg);
+}
+
+function renderLineContatos(labels, aggsHist) {
+  const ctx = document.getElementById('chartContatos');
+  const cfg = {
+    type: 'line',
+    data: { labels, datasets: [{ label: 'Contatos efetivos', data: aggsHist.map(a => a.contatosEfetivos), borderColor: '#4ade80', backgroundColor: 'transparent', tension: 0.3 }] },
+    options: { plugins: { legend: { labels: { color: '#cbd5e1', font: { size: 10.5 } } } }, scales: { x: { ticks: { color: '#94a3b8' }, grid: { color: '#334155' } }, y: { ticks: { color: '#94a3b8' }, grid: { color: '#334155' } } } }
+  };
+  if (charts.contatos) { charts.contatos.data = cfg.data; charts.contatos.update(); }
+  else charts.contatos = new Chart(ctx, cfg);
+}
+
+function renderLineTaxa(labels, aggsHist) {
+  const ctx = document.getElementById('chartTaxa');
+  const cfg = {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        { label: 'Taxa de resposta', data: aggsHist.map(a => Number(a.taxaResposta.toFixed(1))), borderColor: '#f2b705', backgroundColor: 'transparent', tension: 0.3 },
+        { label: 'Meta', data: labels.map(() => metaTaxaResposta), borderColor: '#64748b', borderDash: [5, 5], pointRadius: 0, backgroundColor: 'transparent' }
+      ]
+    },
+    options: { plugins: { legend: { labels: { color: '#cbd5e1', font: { size: 10.5 } } } }, scales: { x: { ticks: { color: '#94a3b8' }, grid: { color: '#334155' } }, y: { ticks: { color: '#94a3b8', callback: (v) => v + '%' }, grid: { color: '#334155' } } } }
+  };
+  if (charts.taxa) { charts.taxa.data = cfg.data; charts.taxa.update(); }
+  else charts.taxa = new Chart(ctx, cfg);
+}
+
+/* ========================= CANAIS DE CONTATO ========================= */
+function refreshCanais() {
+  const mes = document.getElementById('mesReferencia').value;
+  const contagens = { whatsapp: 0, email: 0, ligacao: 0, outro: 0, '': 0 };
+  const linhas = [];
+
+  clients.forEach(([razao, fantasia]) => {
+    const clientId = generateId(razao);
+    const s = obterDadosClienteDoCache(clientId, razao, mes) || {};
+    const tipo = s.foiPreenchido ? (s.canalTipo || '') : '';
+    const obs = s.foiPreenchido ? (s.canalObs !== undefined ? s.canalObs : (s.canal || '')) : '';
+    contagens[tipo] = (contagens[tipo] || 0) + 1;
+    linhas.push({ razao, fantasia, tipo, obs });
+  });
+
+  const nomes = { whatsapp: 'WhatsApp', email: 'E-mail', ligacao: 'Ligação', outro: 'Outro', '': 'A definir' };
+  const wrap = document.getElementById('canalCardsWrap');
+  wrap.innerHTML = '';
+  Object.keys(nomes).forEach(k => {
+    const card = document.createElement('div');
+    card.className = 'kpi-card';
+    card.innerHTML = `<div class="kpi-label">${nomes[k]}</div><div class="kpi-value">${contagens[k] || 0}</div>`;
+    wrap.appendChild(card);
+  });
+
+  const tbody = document.getElementById('canalTableBody');
+  tbody.innerHTML = '';
+  linhas
+    .filter(l => l.tipo || l.obs)
+    .forEach(l => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${escHtml(l.razao)}</td><td>${escHtml(l.fantasia)}</td><td>${nomes[l.tipo]}</td><td>${escHtml(l.obs)}</td>`;
+      tbody.appendChild(tr);
+    });
+}
+
+/* ========================= REUNIÕES ========================= */
+function refreshReunioes() {
+  const mes = document.getElementById('mesReferencia').value;
+  const tbody = document.getElementById('reunioesTableBody');
+  tbody.innerHTML = '';
+  let total = 0;
+
+  clients.forEach(([razao, fantasia]) => {
+    const clientId = generateId(razao);
+    const s = obterDadosClienteDoCache(clientId, razao, mes) || {};
+    if (s.foiPreenchido && s.reuniao === 'sim') {
+      total++;
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${escHtml(razao)}</td><td>${escHtml(fantasia)}</td><td>${escHtml(s.starter || 'starter')}</td><td>${escHtml(s.hs || '-')}</td><td>${escHtml(s.evolucao || 'Não respondido')}</td>`;
+      tbody.appendChild(tr);
+    }
+  });
+
+  document.getElementById('kpi-reunioes-total').textContent = total;
+}
+
+/* ========================= ANÁLISE / INDICADORES ========================= */
+function refreshAnalise() {
+  const mes = document.getElementById('mesReferencia').value;
+  const mesAnterior = calcularMesAnterior(mes);
+  const tbody = document.getElementById('analiseTableBody');
+  tbody.innerHTML = '';
+
+  const linhas = clients.map(([razao, fantasia]) => {
+    const clientId = generateId(razao);
+    const sAtual = obterDadosClienteDoCache(clientId, razao, mes) || {};
+    const sAnterior = obterDadosClienteDoCache(clientId, razao, mesAnterior) || {};
+    const hsAtual = sAtual.foiPreenchido && sAtual.hs !== '' && !isNaN(sAtual.hs) ? parseFloat(sAtual.hs) : null;
+    const hsAnterior = sAnterior.foiPreenchido && sAnterior.hs !== '' && !isNaN(sAnterior.hs) ? parseFloat(sAnterior.hs) : null;
+    const delta = (hsAtual !== null && hsAnterior !== null) ? (hsAtual - hsAnterior) : null;
+    const evolucao = sAtual.foiPreenchido ? (sAtual.evolucao || 'Não respondido') : 'Não respondido';
+    return { razao, fantasia, hsAtual, hsAnterior, delta, evolucao };
+  });
+
+  linhas.sort((a, b) => {
+    const va = a.hsAtual === null ? 999 : a.hsAtual;
+    const vb = b.hsAtual === null ? 999 : b.hsAtual;
+    return va - vb;
+  });
+
+  linhas.forEach(l => {
+    const tr = document.createElement('tr');
+    const deltaTxt = l.delta === null ? '-' : (l.delta > 0 ? '+' + l.delta : String(l.delta));
+    tr.innerHTML = `<td>${escHtml(l.razao)}</td><td>${escHtml(l.fantasia)}</td><td>${l.hsAtual === null ? '-' : l.hsAtual}</td><td>${l.hsAnterior === null ? '-' : l.hsAnterior}</td><td>${deltaTxt}</td><td>${escHtml(l.evolucao)}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+/* ========================= SORTS (tabela Controle) ========================= */
+function resetaHeadersExcept(idAtivo) {
+  const headers = {
+    'th-hs': 'HS ↕', 'th-dias': 'Últ. Tarefa (Dias) ↕', 'th-t1': '1ª Tentativa ↕',
+    'th-t2': '2ª Tentativa ↕', 'th-t3': '3ª Tentativa ↕', 'th-tl': 'Ligação ↕', 'th-contato': 'Contato Efetivo? ↕'
+  };
+  Object.keys(headers).forEach(id => { if (id !== idAtivo) document.getElementById(id).innerHTML = headers[id]; });
+  if (idAtivo !== 'th-contato') currentSortOrderContato = 'none';
+  if (idAtivo !== 'th-hs') currentSortOrderHS = 'none';
+  Object.keys(dateSortStates).forEach(k => { if (`th-${k}` !== idAtivo) dateSortStates[k] = 'none'; });
+}
+
+function getInteractionValue(razao, campoData) {
+  const mes = document.getElementById('mesReferencia').value;
+  const clientId = generateId(razao);
+  const dataObj = obterDadosClienteDoCache(clientId, razao, mes);
+  if (dataObj) {
+    if (campoData === 't1') return dataObj.t1d || '';
+    if (campoData === 't2') return dataObj.t2d || '';
+    if (campoData === 't3') return dataObj.t3d || '';
+    if (campoData === 'tl') return dataObj.tld || '';
+  }
+  return '';
+}
+
+function toggleSortHS() {
+  const thHS = document.getElementById('th-hs');
+  resetaHeadersExcept('th-hs');
+  const mes = document.getElementById('mesReferencia').value;
+
+  if (currentSortOrderHS === 'asc' || currentSortOrderHS === 'none') {
+    clients.sort((a, b) => (parseFloat(obterDadosClienteDoCache(generateId(a[0]), a[0], mes)?.hs) || 0) - (parseFloat(obterDadosClienteDoCache(generateId(b[0]), b[0], mes)?.hs) || 0));
+    currentSortOrderHS = 'desc';
+    thHS.innerHTML = "HS 🔼 Menor para Maior";
+  } else {
+    clients.sort((a, b) => (parseFloat(obterDadosClienteDoCache(generateId(b[0]), b[0], mes)?.hs) || 0) - (parseFloat(obterDadosClienteDoCache(generateId(a[0]), a[0], mes)?.hs) || 0));
+    currentSortOrderHS = 'asc';
+    thHS.innerHTML = "HS 🔽 Maior para Menor";
+  }
+  currentPage = 1;
   buildTable();
-});
+}
+
+function toggleSortDataTentativa(campo, thId, labelOriginal) {
+  const th = document.getElementById(thId);
+  resetaHeadersExcept(thId);
+
+  let proximoEstado = 'sem-data-topo';
+  if (dateSortStates[campo] === 'sem-data-topo') proximoEstado = 'antigo-novo';
+  else if (dateSortStates[campo] === 'antigo-novo') proximoEstado = 'novo-antigo';
+  dateSortStates[campo] = proximoEstado;
+
+  clients.sort((a, b) => {
+    const dataA = getInteractionValue(a[0], campo);
+    const dataB = getInteractionValue(b[0], campo);
+    if (proximoEstado === 'sem-data-topo') {
+      if (!dataA && dataB) return -1;
+      if (dataA && !dataB) return 1;
+      if (!dataA && !dataB) return (Number(b[3]) || 0) - (Number(a[3]) || 0);
+      return dataA.localeCompare(dataB);
+    }
+    if (proximoEstado === 'antigo-novo') {
+      if (!dataA && dataB) return 1;
+      if (dataA && !dataB) return -1;
+      if (!dataA && !dataB) return (Number(b[3]) || 0) - (Number(a[3]) || 0);
+      return dataA.localeCompare(dataB);
+    }
+    if (proximoEstado === 'novo-antigo') {
+      if (!dataA && dataB) return 1;
+      if (dataA && !dataB) return -1;
+      if (!dataA && !dataB) return (Number(b[3]) || 0) - (Number(a[3]) || 0);
+      return dataB.localeCompare(dataA);
+    }
+  });
+
+  if (proximoEstado === 'sem-data-topo') th.innerHTML = `${labelOriginal} ⚪ Vazios Topo`;
+  if (proximoEstado === 'antigo-novo') th.innerHTML = `${labelOriginal} 🔼 Antigos`;
+  if (proximoEstado === 'novo-antigo') th.innerHTML = `${labelOriginal} 🔽 Novos`;
+
+  currentPage = 1;
+  buildTable();
+}
+
+function toggleSortDias() {
+  const thDias = document.getElementById('th-dias');
+  resetaHeadersExcept('th-dias');
+  if (currentSortOrderDias === 'asc') {
+    clients.sort((a, b) => (Number(a[3]) || 0) - (Number(b[3]) || 0));
+    currentSortOrderDias = 'desc';
+    thDias.innerHTML = "Últ. Tarefa (Dias) 🔼";
+  } else {
+    clients.sort((a, b) => (Number(b[3]) || 0) - (Number(a[3]) || 0));
+    currentSortOrderDias = 'asc';
+    thDias.innerHTML = "Últ. Tarefa (Dias) 🔽";
+  }
+  currentPage = 1;
+  buildTable();
+}
+
+function toggleSortContato() {
+  const thContato = document.getElementById('th-contato');
+  resetaHeadersExcept('th-contato');
+  const multiplicadorDias = (currentSortOrderDias === 'desc') ? 1 : -1;
+
+  clients.sort((a, b) => {
+    const mes = document.getElementById('mesReferencia').value;
+    const statusA = (obterDadosClienteDoCache(generateId(a[0]), a[0], mes)?.contato) || 'nao';
+    const statusB = (obterDadosClienteDoCache(generateId(b[0]), b[0], mes)?.contato) || 'nao';
+    if (currentSortOrderContato !== 'sim-primeiro') {
+      if (statusA === 'sim' && statusB === 'nao') return -1;
+      if (statusA === 'nao' && statusB === 'sim') return 1;
+    } else {
+      if (statusA === 'nao' && statusB === 'sim') return -1;
+      if (statusA === 'sim' && statusB === 'nao') return 1;
+    }
+    return ((Number(a[3]) || 0) - (Number(b[3]) || 0)) * multiplicadorDias;
+  });
+
+  if (currentSortOrderContato !== 'sim-primeiro') {
+    currentSortOrderContato = 'sim-primeiro';
+    thContato.innerHTML = "Contato Efetivo? 🟢 Sim primeiro";
+  } else {
+    currentSortOrderContato = 'nao-primeiro';
+    thContato.innerHTML = "Contato Efetivo? 🔴 Não primeiro";
+  }
+  currentPage = 1;
+  buildTable();
+}
+
+/* ========================= MIGRAÇÃO ========================= */
+function confirmarMigracao() {
+  if (confirm('Isso vai sobrescrever os dados do mês selecionado com o histórico local deste navegador. Confirma?')) {
+    executarMigracaoDoAnexo();
+  }
+}
+
+function executarMigracaoDoAnexo() {
+  try {
+    const rawAnexo = localStorage.getItem('obra_prima_interactions_v4') || localStorage.getItem('obra_prima_interactions_mensal_v1');
+    if (!rawAnexo) { alert("Histórico antigo não detectado no cache local deste navegador."); return; }
+    const dadosAnexo = JSON.parse(rawAnexo);
+    const mesSelecionado = document.getElementById('mesReferencia').value;
+    const updates = {};
+
+    Object.keys(dadosAnexo).forEach(key => {
+      const clientId = key.includes('_202') ? key.split('_202')[0] : key;
+      const chaveDestinoMensal = `${clientId}_${mesSelecionado}`;
+      const antigoDado = dadosAnexo[key];
+
+      let cart = 'starter';
+      if (antigoDado.starter === 'sim' || antigoDado.starter === true || antigoDado.starter === 'starter') cart = 'starter';
+      else if (antigoDado.starter === 'basic') cart = 'basic';
+      else if (antigoDado.starter === 'nao') cart = 'nao';
+
+      const dataObj = {
+        starter: cart, hs: '', evolucao: '', reuniao: 'nao',
+        t1: false, t1d: '', t2: false, t2d: '', t3: false, t3d: '', tl: false, tld: '',
+        canalTipo: '', canalObs: '', contato: 'nao', foiPreenchido: true
+      };
+
+      memoryInteractions[chaveDestinoMensal] = dataObj;
+      updates['/interacoes/' + chaveDestinoMensal] = dataObj;
+    });
+
+    db.ref().update(updates).then(() => {
+      buildTable();
+      alert("⚡ Sincronização e migração enviadas com sucesso para a nuvem!");
+    });
+  } catch(e) {
+    alert("Falha ao processar a migração do banco de dados.");
+  }
+}
+
+/* ========================= IMPORTAÇÃO ========================= */
+function importFromPaste() {
+  const input = document.getElementById('csvInput').value.trim();
+  if (!input) { return alert("Cole os dados primeiro."); }
+  if (!confirm('Isso substitui a lista atual de clientes pela nova lista colada. Confirma?')) return;
+
+  const mesSelecionado = document.getElementById('mesReferencia').value;
+  const lines = input.split('\n');
+  const newClients = [];
+  const updates = {};
+  const naoReconhecidas = [];
+
+  lines.forEach((line, idx) => {
+    const tokens = line.includes('\t') ? line.split('\t') : line.split(';');
+    if (tokens.length >= 5) {
+      const razao = tokens[0].trim();
+      const fantasia = tokens[1].trim();
+      const mrr = tokens[2].trim();
+      const tagsCélula = tokens[3].trim().toLowerCase();
+      const dias = parseInt(tokens[4].trim().replace(/[^0-9]/g, '')) || 0;
+
+      if (razao) {
+        newClients.push([razao, fantasia, mrr, dias]);
+        let carteiraIdentificada = 'starter';
+        if (tagsCélula.includes('basic')) carteiraIdentificada = 'basic';
+        else if (tagsCélula.includes('starter')) carteiraIdentificada = 'starter';
+
+        const clientId = generateId(razao);
+        const storageKeyUnique = `${clientId}_${mesSelecionado}`;
+        const estadoExistente = memoryInteractions[storageKeyUnique] || {
+          hs: '', evolucao: '', reuniao: 'nao', t1: false, t1d: '', t2: false, t2d: '', t3: false, t3d: '', tl: false, tld: '', canalTipo: '', canalObs: '', contato: 'nao'
+        };
+        estadoExistente.starter = carteiraIdentificada;
+        estadoExistente.foiPreenchido = true;
+        memoryInteractions[storageKeyUnique] = estadoExistente;
+        updates['/interacoes/' + storageKeyUnique] = estadoExistente;
+      }
+    } else if (line.trim()) {
+      naoReconhecidas.push(idx + 1);
+    }
+  });
+
+  if (newClients.length > 0) {
+    clients = newClients;
+    localStorage.setItem(STORAGE_KEY_CLIENTS, JSON.stringify(clients));
+    db.ref().update(updates).then(() => {
+      currentPage = 1;
+      buildTable();
+      document.getElementById('csvInput').value = '';
+      let msg = `Lista de clientes importada! ${newClients.length} clientes processados.`;
+      if (naoReconhecidas.length) msg += `\n\n⚠️ ${naoReconhecidas.length} linha(s) ignorada(s) por não terem as 5 colunas esperadas: linha(s) ${naoReconhecidas.join(', ')}.`;
+      alert(msg);
+    });
+  } else {
+    alert("Nenhum dado válido pôde ser importado. Certifique-se de copiar as 5 colunas da planilha.");
+  }
+}
+
+function importCoberturasEfetivas() {
+  const input = document.getElementById('coberturaInput').value.trim();
+  if (!input) return alert("Por favor, cole a planilha de cobertura primeiro.");
+
+  const mesSelecionado = document.getElementById('mesReferencia').value;
+  const lines = input.split('\n');
+  const updates = {};
+  let contadosModificados = 0;
+  const naoEncontradas = [];
+
+  lines.forEach((line, idx) => {
+    const tokens = line.includes('\t') ? line.split('\t') : line.split(';');
+    if (tokens.length >= 3) {
+      const razaoPlanilha = limparTextoParaComparacao(tokens[0].trim());
+      const fantasiaPlanilha = limparTextoParaComparacao(tokens[1].trim());
+      const tipoCobertura = tokens[2].trim().toLowerCase();
+
+      const indexCliente = clients.findIndex(c =>
+        limparTextoParaComparacao(c[0]) === razaoPlanilha ||
+        limparTextoParaComparacao(c[1]) === fantasiaPlanilha ||
+        razaoPlanilha.includes(limparTextoParaComparacao(c[1])) ||
+        limparTextoParaComparacao(c[0]).includes(razaoPlanilha)
+      );
+
+      if (indexCliente !== -1) {
+        const clienteReal = clients[indexCliente];
+        const clientId = generateId(clienteReal[0]);
+        const storageKeyUnique = `${clientId}_${mesSelecionado}`;
+
+        const trVigente = document.querySelector(`tr[data-client-id="${clientId}"]`);
+        const hsValorVigente = trVigente ? trVigente.querySelector('.hs-cell-value').textContent : '';
+        const evoValorVigente = trVigente ? trVigente.querySelector('.evo-cell-value').textContent : '';
+        const reuniaoValorVigente = trVigente ? trVigente.querySelector('.reuniao-sel').value : 'nao';
+
+        const estadoAtual = memoryInteractions[storageKeyUnique] || {
+          starter: 'starter', t1: false, t1d: '', t2: false, t2d: '', t3: false, t3d: '', tl: false, tld: '', canalTipo: '', canalObs: ''
+        };
+        estadoAtual.hs = hsValorVigente;
+        estadoAtual.evolucao = evoValorVigente;
+        estadoAtual.reuniao = reuniaoValorVigente;
+
+        if (tipoCobertura.includes("cobertura por tarefa")) estadoAtual.contato = 'sim';
+        else if (tipoCobertura.includes("sem cobertura")) estadoAtual.contato = 'nao';
+
+        estadoAtual.foiPreenchido = true;
+        memoryInteractions[storageKeyUnique] = estadoAtual;
+        updates['/interacoes/' + storageKeyUnique] = estadoAtual;
+        contadosModificados++;
+      } else if (line.trim()) {
+        naoEncontradas.push(tokens[0].trim());
+      }
+    }
+  });
+
+  if (contadosModificados > 0) {
+    db.ref().update(updates).then(() => {
+      buildTable();
+      document.getElementById('coberturaInput').value = '';
+      let msg = `⚡ Sucesso! ${contadosModificados} status de contato atualizados e salvos na nuvem.`;
+      if (naoEncontradas.length) msg += `\n\n⚠️ ${naoEncontradas.length} linha(s) sem correspondência: ${naoEncontradas.slice(0, 10).join(', ')}${naoEncontradas.length > 10 ? '...' : ''}`;
+      alert(msg);
+    });
+  } else {
+    alert("Nenhum cliente correspondente foi localizado na lista de coberturas.");
+  }
+}
+
+function importSaudeEvolucao() {
+  const input = document.getElementById('saudeInput').value.trim();
+  if (!input) return alert("Por favor, cole os dados de saúde primeiro.");
+
+  const mesSelecionado = document.getElementById('mesReferencia').value;
+  const lines = input.split('\n');
+  const updates = {};
+  let processados = 0;
+  const naoEncontradas = [];
+
+  lines.forEach(line => {
+    const tokens = line.includes('\t') ? line.split('\t') : line.split(';');
+    if (tokens.length >= 3) {
+      const nomePlanilhaLimpo = limparTextoParaComparacao(tokens[0].trim());
+      const valorHS = tokens[1].trim().replace(/[^0-9\-]/g, '');
+      let evoTexto = tokens[2].trim().toLowerCase();
+      if (evoTexto.includes("piorou")) evoTexto = "Piorou";
+      else if (evoTexto.includes("melhorou")) evoTexto = "Melhorou";
+      else evoTexto = "Manteve";
+
+      const indexCliente = clients.findIndex(c =>
+        limparTextoParaComparacao(c[0]) === nomePlanilhaLimpo ||
+        limparTextoParaComparacao(c[1]) === nomePlanilhaLimpo ||
+        nomePlanilhaLimpo.includes(limparTextoParaComparacao(c[1])) ||
+        limparTextoParaComparacao(c[0]).includes(nomePlanilhaLimpo)
+      );
+
+      if (indexCliente !== -1) {
+        const clienteReal = clients[indexCliente];
+        const clientId = generateId(clienteReal[0]);
+        const storageKeyUnique = `${clientId}_${mesSelecionado}`;
+
+        const trVigente = document.querySelector(`tr[data-client-id="${clientId}"]`);
+        const reuniaoValorVigente = trVigente ? trVigente.querySelector('.reuniao-sel').value : 'nao';
+
+        const estadoAtual = memoryInteractions[storageKeyUnique] || {
+          starter: 'starter', t1: false, t1d: '', t2: false, t2d: '', t3: false, t3d: '', tl: false, tld: '', canalTipo: '', canalObs: '', contato: 'nao'
+        };
+        estadoAtual.hs = valorHS;
+        estadoAtual.evolucao = evoTexto;
+        estadoAtual.reuniao = reuniaoValorVigente;
+        estadoAtual.foiPreenchido = true;
+        memoryInteractions[storageKeyUnique] = estadoAtual;
+        updates['/interacoes/' + storageKeyUnique] = estadoAtual;
+        processados++;
+      } else if (line.trim()) {
+        naoEncontradas.push(tokens[0].trim());
+      }
+    }
+  });
+
+  if (processados > 0) {
+    db.ref().update(updates).then(() => {
+      buildTable();
+      document.getElementById('saudeInput').value = '';
+      let msg = `⚡ Sucesso! Saúde e Evolução de ${processados} clientes processados e salvos com sucesso na nuvem!`;
+      if (naoEncontradas.length) msg += `\n\n⚠️ ${naoEncontradas.length} sem correspondência: ${naoEncontradas.slice(0, 10).join(', ')}${naoEncontradas.length > 10 ? '...' : ''}`;
+      alert(msg);
+    });
+  } else {
+    alert("Nenhum cliente correspondente foi localizado na lista de saúde. Verifique os nomes das empresas.");
+  }
+}
+
+/* ========================= MÊS ========================= */
+function onMonthChange() {
+  currentPage = 1;
+  buildTable();
+  refreshDashboard();
+  refreshCanais();
+  refreshReunioes();
+  refreshAnalise();
+}
 </script>
 </body>
 </html>
