@@ -1419,9 +1419,12 @@ function executarMigracaoDoAnexo() {
       updates['/interacoes/' + chaveDestinoMensal] = dataObj;
     });
 
+    buildTable();
     db.ref().update(updates).then(() => {
-      buildTable();
       alert("⚡ Sincronização e migração enviadas com sucesso para a nuvem!");
+    }).catch((e) => {
+      console.error('Erro ao sincronizar migração com o Firebase:', e);
+      alert('⚠️ A tela foi atualizada localmente, mas falhou ao sincronizar com a nuvem. Tente novamente.');
     });
   } catch(e) {
     alert("Falha ao processar a migração do banco de dados.");
@@ -1473,13 +1476,17 @@ function importFromPaste() {
   if (newClients.length > 0) {
     clients = newClients;
     localStorage.setItem(STORAGE_KEY_CLIENTS, JSON.stringify(clients));
+    currentPage = 1;
+    buildTable();
+    document.getElementById('csvInput').value = '';
+
     db.ref().update(updates).then(() => {
-      currentPage = 1;
-      buildTable();
-      document.getElementById('csvInput').value = '';
-      let msg = `Lista de clientes importada! ${newClients.length} clientes processados.`;
+      let msg = `Lista de clientes importada e sincronizada com a nuvem! ${newClients.length} clientes processados.`;
       if (naoReconhecidas.length) msg += `\n\n⚠️ ${naoReconhecidas.length} linha(s) ignorada(s) por não terem as 5 colunas esperadas: linha(s) ${naoReconhecidas.join(', ')}.`;
       alert(msg);
+    }).catch((e) => {
+      console.error('Erro ao sincronizar importação com o Firebase:', e);
+      alert('⚠️ A lista foi atualizada na tela, mas falhou ao sincronizar com a nuvem (verifique conexão/permissões). Os dados podem não estar salvos para outros acessos — tente novamente.');
     });
   } else {
     alert("Nenhum dado válido pôde ser importado. Certifique-se de copiar as 5 colunas da planilha.");
@@ -1541,12 +1548,16 @@ function importCoberturasEfetivas() {
   });
 
   if (contadosModificados > 0) {
+    buildTable();
+    document.getElementById('coberturaInput').value = '';
+
     db.ref().update(updates).then(() => {
-      buildTable();
-      document.getElementById('coberturaInput').value = '';
       let msg = `⚡ Sucesso! ${contadosModificados} status de contato atualizados e salvos na nuvem.`;
       if (naoEncontradas.length) msg += `\n\n⚠️ ${naoEncontradas.length} linha(s) sem correspondência: ${naoEncontradas.slice(0, 10).join(', ')}${naoEncontradas.length > 10 ? '...' : ''}`;
       alert(msg);
+    }).catch((e) => {
+      console.error('Erro ao sincronizar coberturas com o Firebase:', e);
+      alert('⚠️ A tela foi atualizada, mas falhou ao sincronizar com a nuvem (verifique conexão/permissões). Tente novamente.');
     });
   } else {
     alert("Nenhum cliente correspondente foi localizado na lista de coberturas.");
@@ -1605,12 +1616,16 @@ function importSaudeEvolucao() {
   });
 
   if (processados > 0) {
+    buildTable();
+    document.getElementById('saudeInput').value = '';
+
     db.ref().update(updates).then(() => {
-      buildTable();
-      document.getElementById('saudeInput').value = '';
       let msg = `⚡ Sucesso! Saúde e Evolução de ${processados} clientes processados e salvos com sucesso na nuvem!`;
       if (naoEncontradas.length) msg += `\n\n⚠️ ${naoEncontradas.length} sem correspondência: ${naoEncontradas.slice(0, 10).join(', ')}${naoEncontradas.length > 10 ? '...' : ''}`;
       alert(msg);
+    }).catch((e) => {
+      console.error('Erro ao sincronizar saúde/evolução com o Firebase:', e);
+      alert('⚠️ A tela foi atualizada, mas falhou ao sincronizar com a nuvem (verifique conexão/permissões). Tente novamente.');
     });
   } else {
     alert("Nenhum cliente correspondente foi localizado na lista de saúde. Verifique os nomes das empresas.");
