@@ -605,11 +605,12 @@ auth.onAuthStateChanged((user) => {
 
 function initApp() {
   setDefaultMonth();
-  loadClients();
-  carregarConfig(() => {
-    carregarDadosDaNuvem(() => {
-      buildTable();
-      refreshDashboard();
+  carregarClientesDaNuvem(() => {
+    carregarConfig(() => {
+      carregarDadosDaNuvem(() => {
+        buildTable();
+        refreshDashboard();
+      });
     });
   });
 }
@@ -667,6 +668,41 @@ function setDefaultMonth() {
   const ano = hoje.getFullYear();
   const mes = String(hoje.getMonth() + 1).padStart(2, '0');
   document.getElementById('mesReferencia').value = `${ano}-${mes}`;
+}
+
+function carregarClientesDaNuvem(callback) {
+  db.ref('clientesBase').once('value').then((snap) => {
+    const val = snap.val();
+    if (val && Object.keys(val).length > 0) {
+      clients = Object.values(val).map(c => [c.razao, c.fantasia, c.mrr, c.dias]);
+      if (callback) callback();
+    } else {
+      // Primeira vez usando a nuvem como fonte: migra o que já existir salvo localmente neste navegador;
+      // se não houver nada local, usa a lista padrão embutida no arquivo como semente inicial.
+      let base = clients;
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY_CLIENTS);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed) && parsed.length > 0) base = parsed;
+        }
+      } catch (e) { console.error('Erro ao ler cache local para migração:', e); }
+      clients = base;
+      salvarClientesNaNuvem(base).catch((e) => console.error('Erro ao semear clientesBase na nuvem:', e)).finally(() => { if (callback) callback(); });
+    }
+  }).catch((e) => {
+    console.error('Erro ao carregar clientesBase da nuvem:', e);
+    if (callback) callback();
+  });
+}
+
+function salvarClientesNaNuvem(lista) {
+  const obj = {};
+  lista.forEach(([razao, fantasia, mrr, dias]) => {
+    const id = generateId(razao);
+    obj[id] = { razao, fantasia, mrr: mrr || '', dias: dias || 0 };
+  });
+  return db.ref('clientesBase').set(obj);
 }
 
 function loadClients() {
@@ -1476,12 +1512,14 @@ function importFromPaste() {
 
   if (newClients.length > 0) {
     clients = newClients;
-    localStorage.setItem(STORAGE_KEY_CLIENTS, JSON.stringify(clients));
     currentPage = 1;
     buildTable();
     document.getElementById('csvInput').value = '';
 
-    db.ref().update(updates).then(() => {
+    Promise.all([
+      salvarClientesNaNuvem(newClients),
+      db.ref().update(updates)
+    ]).then(() => {
       let msg = `Lista de clientes importada e sincronizada com a nuvem! ${newClients.length} clientes processados.`;
       if (naoReconhecidas.length) msg += `\n\n⚠️ ${naoReconhecidas.length} linha(s) ignorada(s) por não terem as 5 colunas esperadas: linha(s) ${naoReconhecidas.join(', ')}.`;
       alert(msg);
