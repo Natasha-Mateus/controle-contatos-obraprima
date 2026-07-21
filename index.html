@@ -220,7 +220,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 </head>
 <body>
 
@@ -437,12 +437,12 @@
 <script>
 const firebaseConfig = {
   apiKey: "AIzaSyBJiByqJfnNG6tFUsRLLWjtarji-zFaJkY",
-  authDomain: "controle-tentativas-obraprima.firebaseapp.com",
-  databaseURL: "https://controle-tentativas-obraprima-default-rtdb.firebaseio.com",
-  projectId: "controle-tentativas-obraprima",
-  storageBucket: "controle-tentativas-obraprima.appspot.com",
-  messagingSenderId: "6309641144",
-  appId: "1:6309641144:web:85caa158b49fa82ab9d48d"
+  authDomain: "controle-tentativas-obra-a922f.firebaseapp.com",
+  databaseURL: "https://controle-tentativas-obra-a922f-default-rtdb.firebaseio.com",
+  projectId: "controle-tentativas-obra-a922f",
+  storageBucket: "controle-tentativas-obra-a922f.firebasestorage.app",
+  messagingSenderId: "146263749448",
+  appId: "1:146263749448:web:e0f6da7a48f45aafef397d"
 };
 
 firebase.initializeApp(firebaseConfig);
@@ -603,13 +603,29 @@ auth.onAuthStateChanged((user) => {
   }
 });
 
+let initFallbackFired = false;
+
 function initApp() {
   setDefaultMonth();
+
+  const fallbackTimer = setTimeout(() => {
+    if (!initFallbackFired) {
+      initFallbackFired = true;
+      console.warn('Carregamento da nuvem demorou demais — exibindo a tela com os dados disponíveis até agora.');
+      buildTable();
+      refreshDashboard();
+    }
+  }, 8000);
+
   carregarClientesDaNuvem(() => {
     carregarConfig(() => {
       carregarDadosDaNuvem(() => {
-        buildTable();
-        refreshDashboard();
+        if (!initFallbackFired) {
+          initFallbackFired = true;
+          clearTimeout(fallbackTimer);
+          buildTable();
+          refreshDashboard();
+        }
       });
     });
   });
@@ -974,10 +990,10 @@ function buildTable() {
           <option value="nao" ${starter === 'nao' ? 'selected' : ''}>Não</option>
         </select>
       </td>
-      <td><div class="check-group"><input type="checkbox" class="t1-chk" ${t1 ? 'checked' : ''}><input type="date" class="t1-date" value="${t1d}" oninput="onDateInput(this, '.t1-chk')"></div></td>
-      <td><div class="check-group"><input type="checkbox" class="t2-chk" ${t2 ? 'checked' : ''}><input type="date" class="t2-date" value="${t2d}" oninput="onDateInput(this, '.t2-chk')"></div></td>
-      <td><div class="check-group"><input type="checkbox" class="t3-chk" ${t3 ? 'checked' : ''}><input type="date" class="t3-date" value="${t3d}" oninput="onDateInput(this, '.t3-chk')"></div></td>
-      <td><div class="check-group"><input type="checkbox" class="tl-chk" ${tl ? 'checked' : ''}><input type="date" class="tl-date" value="${tld}" oninput="onDateInput(this, '.tl-chk')"></div></td>
+      <td><div class="check-group"><input type="checkbox" class="t1-chk" ${t1 ? 'checked' : ''} onchange="saveData()"><input type="date" class="t1-date" value="${t1d}" oninput="onDateInput(this, '.t1-chk')"></div></td>
+      <td><div class="check-group"><input type="checkbox" class="t2-chk" ${t2 ? 'checked' : ''} onchange="saveData()"><input type="date" class="t2-date" value="${t2d}" oninput="onDateInput(this, '.t2-chk')"></div></td>
+      <td><div class="check-group"><input type="checkbox" class="t3-chk" ${t3 ? 'checked' : ''} onchange="saveData()"><input type="date" class="t3-date" value="${t3d}" oninput="onDateInput(this, '.t3-chk')"></div></td>
+      <td><div class="check-group"><input type="checkbox" class="tl-chk" ${tl ? 'checked' : ''} onchange="saveData()"><input type="date" class="tl-date" value="${tld}" oninput="onDateInput(this, '.tl-chk')"></div></td>
       <td>
         <select class="custom-sel canal-sel" onchange="saveData()">
           <option value="" ${!canalTipo ? 'selected' : ''}>A definir</option>
