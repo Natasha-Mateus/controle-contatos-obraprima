@@ -672,7 +672,14 @@ function setDefaultMonth() {
 function loadClients() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY_CLIENTS);
-    if (raw) clients = JSON.parse(raw);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        clients = parsed;
+      } else {
+        console.warn('Lista de clientes salva localmente estava vazia ou inválida — mantendo a lista padrão embutida no arquivo.');
+      }
+    }
   } catch(e) { console.error("Erro ao carregar clientes", e); }
 }
 
